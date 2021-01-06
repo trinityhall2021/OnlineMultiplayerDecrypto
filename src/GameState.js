@@ -45,6 +45,32 @@ function DisplayCode(props) {
       <h3>DisplayCode</h3>
     </div>
   );
+
+class DisplayCode extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      codecard: props.codecard,
+    };
+  }
+
+  render() {
+    let codecard = "";
+
+    for (let i = 0; i < this.state.codecard.length; i++) {
+      codecard += this.state.codecard[i];
+      codecard += " ";
+    }
+
+    return (
+      <div>
+        <h3>Display Code</h3>
+        <div>
+          <p>{codecard}</p>
+        </div>
+      </div>
+    );
+  }
 }
 
 export class GameState extends Component {
@@ -52,6 +78,7 @@ export class GameState extends Component {
     super(props);
     this.state = {
       gamestate: props.gamestate,
+      codecard: props.codecard,
     };
   }
 
@@ -61,7 +88,7 @@ export class GameState extends Component {
     } else if (this.state.gamestate === INTERCEPT) {
       return <Intercept />;
     } else if (this.state.gamestate === DISPLAY_CODE) {
-      return <DisplayCode />;
+      return <DisplayCode codecard={this.state.codecard} />;
     }
     return <SubmitGuess />;
   }
