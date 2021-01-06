@@ -1,71 +1,69 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 
 export const SUBMIT_GUESS = 0;
 export const INTERCEPT = 1;
 export const DISPLAY_CODE = 2;
 
 function SubmitGuess(props) {
-    return (
-        <div>
-            <h3>Submit Guess</h3>
-        </div>
-    )
+  return (
+    <div>
+      <h3>Submit Guess</h3>
+    </div>
+  );
 }
 
 function Intercept(props) {
-    return (
-        <div>
-            <h3>Intercept</h3>
-        </div>
-    )
+  return (
+    <div>
+      <h3>Intercept</h3>
+    </div>
+  );
 }
 
 class DisplayCode extends Component {
-    
-    constructor(props){
-        super(props);
-        this.state = {
-            codecard : props.codecard
-        }
+  constructor(props) {
+    super(props);
+    this.state = {
+      codecard: props.codecard,
+    };
+  }
+
+  render() {
+    let codecard = "";
+
+    for (let i = 0; i < this.state.codecard.length; i++) {
+      codecard += this.state.codecard[i];
+      codecard += " ";
     }
 
-    render(){
-        let codecard = "";
-
-        for (let i=0; i < this.state.codecard.length; i++) {
-            codecard += this.state.codecard[i];
-            codecard += " ";
-        }
-
-        return (
-            <div>
-                <h3>Display Code</h3>
-                <div>
-                    <p>{codecard}</p>
-                </div>
-            </div>
-        )
-    }
+    return (
+      <div>
+        <h3>Display Code</h3>
+        <div>
+          <p>{codecard}</p>
+        </div>
+      </div>
+    );
+  }
 }
 
 export class GameState extends Component {
-    
-    constructor(props) {
-        super(props);
-        this.state = {
-            gamestate: props.gamestate,
-            codecard: props.codecard
-        }
+  constructor(props) {
+    super(props);
+    this.state = {
+      gamestate: props.gamestate,
+      codecard: props.codecard,
+    };
+  }
+
+  render() {
+    if (this.state.gamestate === SUBMIT_GUESS) {
+      return <SubmitGuess />;
+    } else if (this.state.gamestate === INTERCEPT) {
+      return <Intercept />;
+    } else if (this.state.gamestate === DISPLAY_CODE) {
+      return <DisplayCode codecard={this.state.codecard} />;
     }
-    
-    render() {
-        if (this.state.gamestate === SUBMIT_GUESS) {
-            return <SubmitGuess />;
-        } else if (this.state.gamestate === INTERCEPT) {
-            return <Intercept />;
-        } else if (this.state.gamestate === DISPLAY_CODE) {
-            return <DisplayCode codecard={this.state.codecard} />;
-        }
-        return <SubmitGuess />;
-    }
+    return <SubmitGuess />;
+  }
 }

@@ -1,29 +1,27 @@
-import React, { Component } from 'react';
-import './Game.css';
-import { DISPLAY_CODE, SUBMIT_GUESS, INTERCEPT, GameState } from './GameState';
-import Player from './Player';
-import Team from './Team';
-import WordCard from './WordCard'
+import React, { Component } from "react";
+import "./Game.css";
+import { DISPLAY_CODE, SUBMIT_GUESS, INTERCEPT, GameState } from "./GameState";
+import Player from "./Player";
+import Team from "./Team";
+import WordCard from "./WordCard";
 
 class Game extends Component {
-
   constructor(props) {
-      super(props);
-      this.state = {
-          game_state : DISPLAY_CODE,
-          codecard: ["1", "2", "3"],
-          red_team_players: ["User1", "User3"],
-          blue_team_players: ["User2", "User4"]
-      }
+    super(props);
+    this.state = {
+      game_state: DISPLAY_CODE,
+      codecard: ["1", "2", "3"],
+      red_team_players: ["User1", "User3"],
+      blue_team_players: ["User2", "User4"],
+    };
   }
 
   render() {
-
     return (
       <div className="Game">
         <h1>DECRYPTO</h1>
         <h2>USER INFO</h2>
-        <Player name="User1" team="RED"/>
+        <Player name="User1" team="RED" />
 
         <h2>WORDCARDS</h2>
         <div class="flex-container">
@@ -34,22 +32,25 @@ class Game extends Component {
         </div>
 
         <h2>ACTION</h2>
-        <GameState 
+        <GameState
           gamestate={this.state.game_state}
-          codecard={this.state.codecard} />
+          codecard={this.state.codecard}
+        />
 
         <h2>TEAM INFORMATION</h2>
         <div class="flex-container">
-            <Team 
-                team_name="Red"
-                team_players={this.state.red_team_players} 
-                num_misses="0"
-                num_intercepts="0"/>
-            <Team
-                team_name="Blue"
-                team_players={this.state.blue_team_players}
-                num_misses="1"
-                num_intercepts="1" />
+          <Team
+            team_name="Red"
+            team_players={this.state.red_team_players}
+            num_misses="0"
+            num_intercepts="0"
+          />
+          <Team
+            team_name="Blue"
+            team_players={this.state.blue_team_players}
+            num_misses="1"
+            num_intercepts="1"
+          />
         </div>
       </div>
     );
