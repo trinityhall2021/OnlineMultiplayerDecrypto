@@ -1,4 +1,19 @@
 # OnlineMultiplayerDecrypto
+
 Online Multiplayer Decrypto
 
-By Cory Nezin
+## Install
+
+Run
+
+```
+npm install
+```
+
+## Running
+
+Run
+
+```
+npm start
+```
