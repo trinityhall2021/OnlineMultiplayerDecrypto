@@ -9,7 +9,7 @@ class Game extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      game_state: SUBMIT_GUESS,
+      game_state: INTERCEPT,
       codecard: ["1", "2", "3"],
       red_team_players: ["User1", "User3"],
       blue_team_players: ["User2", "User4"],
@@ -22,7 +22,6 @@ class Game extends Component {
         <h1>DECRYPTO</h1>
         <h2>USER INFO</h2>
         <Player name="User1" team="RED" />
-
         <h2>WORDCARDS</h2>
         <div class="flex-container">
           <div class="flex-container column">

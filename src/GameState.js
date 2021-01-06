@@ -5,10 +5,10 @@ export const INTERCEPT = 1;
 export const DISPLAY_CODE = 2;
 
 
-function SubmitGuess(props) {
+function Submit (props) {
   return (
     <div>
-      <h3>Submit Guess</h3>
+      <h3>{props.title}</h3>
       <select name="code-1" id="code-1">
         <option value="1">1</option>
         <option value="2">2</option>
@@ -32,11 +32,15 @@ function SubmitGuess(props) {
   );
 }
 
+function SubmitGuess(props) {
+  return (
+    <Submit title="Submit Guess"/>
+  );
+}
+
 function Intercept(props) {
   return (
-    <div>
-      <h3>Intercept</h3>
-    </div>
+    <Submit title="Intercept Guess"/>
   );
 }
 
