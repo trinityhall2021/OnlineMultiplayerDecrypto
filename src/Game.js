@@ -10,7 +10,7 @@ class Game extends Component {
   constructor(props) {
       super(props);
       this.state = {
-          game_state : INTERCEPT,
+          game_state : SUBMIT_GUESS,
           red_team_players: ["User1", "User3"],
           blue_team_players: ["User2", "User4"]
       }
@@ -26,10 +26,22 @@ class Game extends Component {
 
         <h2>WORDCARDS</h2>
         <div class="flex-container">
-          <WordCard word="HELLO" />
-          <WordCard word="WORLD" />
-          <WordCard word="FLEX" />
-          <WordCard word="X" />
+          <div class="flex-container column">
+            <WordCard word="1" />
+            <WordCard word="HELLO" />
+          </div>
+          <div class="flex-container column">
+            <WordCard word="2" />
+            <WordCard word="WORLD" />
+          </div>
+          <div class="flex-container column">
+            <WordCard word="3" />
+            <WordCard word="WEIRD" />
+          </div>
+          <div class="flex-container column">
+            <WordCard word="4" />
+            <WordCard word="FLEX" />
+          </div>
         </div>
 
         <h2>ACTION</h2>
