@@ -4,6 +4,7 @@ export const SUBMIT_GUESS = 0;
 export const INTERCEPT = 1;
 export const DISPLAY_CODE = 2;
 
+
 function SubmitGuess(props) {
   return (
     <div>
@@ -38,13 +39,6 @@ function Intercept(props) {
     </div>
   );
 }
-
-function DisplayCode(props) {
-  return (
-    <div>
-      <h3>DisplayCode</h3>
-    </div>
-  );
 
 class DisplayCode extends Component {
   constructor(props) {
