@@ -5,51 +5,89 @@ export const SUBMIT_GUESS = 0;
 export const INTERCEPT = 1;
 export const DISPLAY_CODE = 2;
 
-const socket = socketIOClient("127.0.0.1:5000");
-function Submit(props) {
-  return (
-    <div>
-      <h3>{props.title}</h3>
-      <select name="code-1" id="code-1">
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-      </select>
-      <select name="code-2" id="code-2">
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-      </select>
-      <select name="code-3" id="code-3">
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-      </select>
-      <button onClick={props.onClick}>Submit</button>
-    </div>
-  );
-}
+const ENDPOINT = "http://127.0.0.1:5000";
+const socket = socketIOClient(ENDPOINT);
 
-function SubmitGuess(props) {
-  return <Submit title="Submit Guess" />;
-}
-
-function Intercept(props) {
-  function handleInterceptClick(e) {
-    const guess_list = [];
-    e.preventDefault();
-    console.log("The button was clicked");
-    guess_list.push(document.getElementById("code-1").value);
-    guess_list.push(document.getElementById("code-2").value);
-    // guess_list.push(document.getElementById("code-3").value);
-
-    socket.emit("interceptSubmitted", guess_list);
+class Submit extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      code_1: "1",
+      code_2: "2",
+      code_3: "3",
+      type: props.type,
+    };
+    this.handleChange = this.handleChange.bind(this);
   }
-  return <Submit title="Intercept Guess" onClick={handleInterceptClick} />;
+  handleChange(e) {
+    let state = {};
+    state[e.target.name] = e.target.value;
+    console.log(state);
+    this.setState(state);
+  }
+  render() {
+    let title = "";
+    let buttonFunction = null;
+    if (this.state.type === SUBMIT_GUESS) {
+      title = "Submit Guess";
+      buttonFunction = submitGuess;
+    }
+    if (this.state.type === INTERCEPT) {
+      title = "Intercept Guess";
+      buttonFunction = interceptGuess;
+    }
+    return (
+      <div>
+        <h3>{title}</h3>
+        <select
+          value={this.state.code_1}
+          onChange={this.handleChange}
+          name="code_1"
+        >
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+        </select>
+        <select
+          value={this.state.code_2}
+          onChange={this.handleChange}
+          name="code_2"
+        >
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+        </select>
+        <select
+          value={this.state.code_3}
+          onChange={this.handleChange}
+          name="code_3"
+        >
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+        </select>
+        <button onClick={() => buttonFunction(this.state)}>Submit</button>
+      </div>
+    );
+  }
 }
+
+function submitGuess(code) {
+  console.log(code);
+  socket.emit("submit_guess", code);
+}
+
+function interceptGuess(code) {
+  socket.emit("intercept_guess", code);
+}
+
+socket.on("guess_submitted", (msg) => {
+  console.log(msg);
+  console.log("guess submitted!");
+});
 
 class DisplayCode extends Component {
   constructor(props) {
@@ -81,13 +119,23 @@ class DisplayCode extends Component {
   }
 }
 
-export function GameState(props) {
-  if (props.gamestate === SUBMIT_GUESS) {
-    return <SubmitGuess />;
-  } else if (props.gamestate === INTERCEPT) {
-    return <Intercept />;
-  } else if (props.gamestate === DISPLAY_CODE) {
-    return <DisplayCode codecard={props.codecard} />;
+export class GameState extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      gamestate: props.gamestate,
+      codecard: props.codecard,
+    };
   }
-  return <SubmitGuess />;
+
+  render() {
+    if (
+      this.state.gamestate === SUBMIT_GUESS ||
+      this.state.gamestate === INTERCEPT
+    ) {
+      return <Submit type={this.state.gamestate} />;
+    } else if (this.state.gamestate === DISPLAY_CODE) {
+      return <DisplayCode/>;
+    }
+  }
 }

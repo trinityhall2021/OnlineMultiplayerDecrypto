@@ -18,17 +18,10 @@ codecards = cycle(iter(codecards))
 def user():
     return '"brenda"'
 
-def messageReceived(methods=['GET', 'POST']):
-    print('message was received!!!')
-
-@socketio.on('my event')
-def handle_my_custom_event(json, methods=['GET', 'POST']):
-    print('received my event: ' + str(json))
-    socketio.emit('my response', json, callback=messageReceived)
-
-@socketio.on('interceptSubmitted')
-def interceptSubmitted(json, methods=['GET', 'POST']):
-    print("Received intercept: " + str(json))
+@socketio.on('submit_guess')
+def guess_submitted(json, methods=['GET', 'PUT', 'POST']):
+    print(json)
+    socketio.emit('guess_submitted', json)
 
 @app.route('/requestClue')
 def request_clue(methods=['GET', 'POST']):
