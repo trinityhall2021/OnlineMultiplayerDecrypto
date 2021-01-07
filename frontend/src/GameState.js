@@ -5,8 +5,8 @@ export const SUBMIT_GUESS = 0;
 export const INTERCEPT = 1;
 export const DISPLAY_CODE = 2;
 
-const ENDPOINT = 'http://127.0.0.1:5000';
-const socket = socketIOClient(ENDPOINT)
+const ENDPOINT = "http://127.0.0.1:5000";
+const socket = socketIOClient(ENDPOINT);
 
 class Submit extends Component {
   constructor(props) {
@@ -17,32 +17,32 @@ class Submit extends Component {
       code_3: "3",
       type: props.type,
     };
-    this.handleChange = this.handleChange.bind(this)
+    this.handleChange = this.handleChange.bind(this);
   }
   handleChange(e) {
     let state = {};
     state[e.target.name] = e.target.value;
-    console.log(state)
+    console.log(state);
     this.setState(state);
   }
   render() {
-    let title = '';
+    let title = "";
     let buttonFunction = null;
-    if (this.state.type == SUBMIT_GUESS ) {
-      title = 'Submit Guess'
-      buttonFunction = submitGuess
+    if (this.state.type == SUBMIT_GUESS) {
+      title = "Submit Guess";
+      buttonFunction = submitGuess;
     }
-    if (this.state.type == INTERCEPT ) {
-      title = 'Intercept Guess'
-      buttonFunction = interceptGuess
+    if (this.state.type == INTERCEPT) {
+      title = "Intercept Guess";
+      buttonFunction = interceptGuess;
     }
     return (
       <div>
         <h3>{title}</h3>
         <select
-            value={this.state.code_1}
-            onChange={this.handleChange}
-            name="code_1"
+          value={this.state.code_1}
+          onChange={this.handleChange}
+          name="code_1"
         >
           <option value="1">1</option>
           <option value="2">2</option>
@@ -50,9 +50,9 @@ class Submit extends Component {
           <option value="4">4</option>
         </select>
         <select
-            value={this.state.code_2}
-            onChange={this.handleChange}
-            name="code_2"
+          value={this.state.code_2}
+          onChange={this.handleChange}
+          name="code_2"
         >
           <option value="1">1</option>
           <option value="2">2</option>
@@ -60,36 +60,33 @@ class Submit extends Component {
           <option value="4">4</option>
         </select>
         <select
-            value={this.state.code_3}
-            onChange={this.handleChange}
-            name="code_3"
+          value={this.state.code_3}
+          onChange={this.handleChange}
+          name="code_3"
         >
           <option value="1">1</option>
           <option value="2">2</option>
           <option value="3">3</option>
           <option value="4">4</option>
         </select>
-        <button
-          onClick={() => buttonFunction(this.state)}>
-          Submit
-        </button>
+        <button onClick={() => buttonFunction(this.state)}>Submit</button>
       </div>
     );
   }
 }
 
 function submitGuess(code) {
-  socket.emit('submit_guess', code);
+  socket.emit("submit_guess", code);
 }
 
 function interceptGuess(code) {
-  socket.emit('intercept_guess', code);
+  socket.emit("intercept_guess", code);
 }
 
-socket.on('guess_submitted', (msg) => {
-  console.log(msg)
-  console.log('guess submitted!');
-})
+socket.on("guess_submitted", (msg) => {
+  console.log(msg);
+  console.log("guess submitted!");
+});
 
 class DisplayCode extends Component {
   constructor(props) {
@@ -128,8 +125,11 @@ export class GameState extends Component {
   }
 
   render() {
-    if (this.state.gamestate === SUBMIT_GUESS || this.state.gamestate === INTERCEPT) {
-      return <Submit type={this.state.gamestate}/>;
+    if (
+      this.state.gamestate === SUBMIT_GUESS ||
+      this.state.gamestate === INTERCEPT
+    ) {
+      return <Submit type={this.state.gamestate} />;
     } else if (this.state.gamestate === DISPLAY_CODE) {
       return <DisplayCode codecard={this.state.codecard} />;
     }
