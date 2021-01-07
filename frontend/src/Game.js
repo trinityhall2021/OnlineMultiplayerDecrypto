@@ -11,9 +11,16 @@ class Game extends Component {
     this.state = {
       game_state: INTERCEPT,
       codecard: ["1", "2", "3"],
-      red_team_players: ["User1", "User3"],
-      blue_team_players: ["User2", "User4"],
+      red_team_players: ["User1"],
+      blue_team_players: ["User2"],
     };
+    fetch('/user').then(resp => resp.json()).then(data => {
+      let new_players = this.state.red_team_players.slice();
+      new_players.push(data);
+      this.setState(
+        {red_team_players: new_players}
+      );
+    });
   }
 
   render() {
@@ -23,20 +30,20 @@ class Game extends Component {
         <h2>USER INFO</h2>
         <Player name="User1" team="RED" />
         <h2>WORDCARDS</h2>
-        <div class="flex-container">
-          <div class="flex-container column">
+        <div className="flex-container">
+          <div className="flex-container column">
             <WordCard word="1" />
             <WordCard word="HELLO" />
           </div>
-          <div class="flex-container column">
+          <div className="flex-container column">
             <WordCard word="2" />
             <WordCard word="WORLD" />
           </div>
-          <div class="flex-container column">
+          <div className="flex-container column">
             <WordCard word="3" />
             <WordCard word="WEIRD" />
           </div>
-          <div class="flex-container column">
+          <div className="flex-container column">
             <WordCard word="4" />
             <WordCard word="FLEX" />
           </div>
@@ -49,7 +56,7 @@ class Game extends Component {
         />
 
         <h2>TEAM INFORMATION</h2>
-        <div class="flex-container">
+        <div className="flex-container">
           <Team
             team_name="Red"
             team_players={this.state.red_team_players}
