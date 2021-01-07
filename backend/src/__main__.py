@@ -11,13 +11,10 @@ game = {}
 def user():
     return '"brenda"'
 
-@socketio.on('guess_submitted')
+@socketio.on('submit_guess')
 def guess_submitted(json, methods=['GET', 'PUT', 'POST']):
-    socketio.emit('guess_received', json)
-
-@socketio.on('interceptSubmitted')
-def interceptSubmitted(json, methods=['GET', 'POST']):
-    print("Received intercept: " + str(json))
+    print(json)
+    socketio.emit('guess_submitted', json)
 
 
 if __name__ == '__main__':
