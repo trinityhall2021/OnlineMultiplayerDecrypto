@@ -15,5 +15,10 @@ def user():
 def guess_submitted(json, methods=['GET', 'PUT', 'POST']):
     socketio.emit('guess_received', json)
 
+@socketio.on('interceptSubmitted')
+def interceptSubmitted(json, methods=['GET', 'POST']):
+    print("Received intercept: " + str(json))
+
+
 if __name__ == '__main__':
     socketio.run(app, debug=True)

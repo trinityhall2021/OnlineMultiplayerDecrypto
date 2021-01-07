@@ -27,7 +27,7 @@ function Submit (props) {
         <option value="3">3</option>
         <option value="4">4</option>
       </select>
-      <button>Submit</button>
+      <button onClick={props.onClickFunction} >Submit</button>
     </div>
   );
 }
@@ -40,7 +40,7 @@ function SubmitGuess(props) {
 
 function Intercept(props) {
   return (
-    <Submit title="Intercept Guess"/>
+    <Submit title="Intercept Guess" onClickFunction="" />
   );
 }
 
