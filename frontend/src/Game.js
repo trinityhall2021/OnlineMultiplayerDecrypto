@@ -9,18 +9,18 @@ class Game extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      game_state: INTERCEPT,
-      codecard: ["1", "2", "3"],
+      game_state: DISPLAY_CODE,
+      codecard: ["0", "0", "0"],
       red_team_players: ["User1"],
       blue_team_players: ["User2"],
     };
-    fetch('/user').then(resp => resp.json()).then(data => {
-      let new_players = this.state.red_team_players.slice();
-      new_players.push(data);
-      this.setState(
-        {red_team_players: new_players}
-      );
-    });
+    fetch("/user")
+      .then((resp) => resp.json())
+      .then((data) => {
+        let new_players = this.state.red_team_players.slice();
+        new_players.push(data);
+        this.setState({ red_team_players: new_players });
+      });
   }
 
   render() {
