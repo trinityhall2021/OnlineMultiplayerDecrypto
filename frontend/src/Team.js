@@ -1,5 +1,3 @@
-import React, { Component } from "react";
-
 function Team(props) {
   const team_players = [];
 
