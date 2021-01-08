@@ -1,12 +1,9 @@
 import React, { Component } from "react";
-import socketIOClient from "socket.io-client";
+import socket from './Socket'
 
 export const SUBMIT_GUESS = 0;
 export const INTERCEPT = 1;
 export const DISPLAY_CODE = 2;
-
-const ENDPOINT = "http://127.0.0.1:5000";
-const socket = socketIOClient(ENDPOINT);
 
 class Submit extends Component {
   constructor(props) {
