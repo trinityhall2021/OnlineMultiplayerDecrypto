@@ -4,6 +4,8 @@ import { DISPLAY_CODE, SUBMIT_GUESS, INTERCEPT, GameState } from "./GameState";
 import Player from "./Player";
 import Team from "./Team";
 import WordCard from "./WordCard";
+import socket from './Socket'
+
 
 class Game extends Component {
   constructor(props) {
@@ -11,16 +13,14 @@ class Game extends Component {
     this.state = {
       gameState: SUBMIT_GUESS,
       codecard: ["0", "0", "0"],
-      red_team_players: ["User1"],
-      blue_team_players: ["User2"],
+      red_team: {players: []},
+      blue_team: {players: []},
     };
-    fetch("/user")
-      .then((resp) => resp.json())
-      .then((data) => {
-        let new_players = this.state.red_team_players.slice();
-        new_players.push(data);
-        this.setState({ red_team_players: new_players });
-      });
+  }
+  componentDidMount() {
+    socket.on('player_added', (msg) => {
+      this.setState(msg)
+    });
   }
 
   render() {
@@ -63,15 +63,15 @@ class Game extends Component {
         <div className="flex-container">
           <Team
             team_name="Red"
-            team_players={this.state.red_team_players}
-            num_misses="0"
-            num_intercepts="0"
+            team_players={this.state.red_team.players}
+            num_misses={this.state.red_team.misses}
+            num_intercepts={this.state.red_team.intercepts}
           />
           <Team
             team_name="Blue"
-            team_players={this.state.blue_team_players}
-            num_misses="1"
-            num_intercepts="1"
+            team_players={this.state.blue_team.players}
+            num_misses={this.state.blue_team.misses}
+            num_intercepts={this.state.blue_team.intercepts}
           />
         </div>
       </div>
@@ -80,3 +80,4 @@ class Game extends Component {
 }
 
 export default Game;
+

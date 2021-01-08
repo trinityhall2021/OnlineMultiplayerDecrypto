@@ -106,5 +106,11 @@ def request_clue(methods=['GET', 'POST']):
     print("Clue requested : " + str(current_codecard))
     return jsonify({"codecard": current_codecard})
 
+@socketio.on('submit_name')
+def submit_name(json, methods=['GET', 'POST', 'PUT']):
+    print('name received: ' + str(json))
+    # TODO: logic to add a new player
+
+
 if __name__ == '__main__':
     socketio.run(app, debug=True)

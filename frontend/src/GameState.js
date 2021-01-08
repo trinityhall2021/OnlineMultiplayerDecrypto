@@ -1,13 +1,9 @@
 import React, { Component } from "react";
-import socketIOClient from "socket.io-client";
+import socket from './Socket'
 
 export const SUBMIT_GUESS = 0;
 export const INTERCEPT = 1;
 export const DISPLAY_CODE = 2;
-
-const ENDPOINT = "http://127.0.0.1:5000";
-const socket = socketIOClient(
-  ENDPOINT, {query: 'room_id=main'});
 
 class Submit extends Component {
   constructor(props) {
@@ -87,11 +83,6 @@ function interceptGuess(code) {
 socket.on("guess_submitted", (msg) => {
   console.log(msg);
   console.log("guess submitted!");
-});
-
-socket.on("player_added", (msg) => {
-  console.log(msg);
-  console.log("player added!");
 });
 
 class DisplayCode extends Component {
