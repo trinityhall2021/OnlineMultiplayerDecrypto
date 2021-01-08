@@ -43,7 +43,7 @@ class Player():
 class Team():
     players: List[Player] = dataclasses.field(default_factory=list)
     intercepts: int = 0
-    miscommunications: int = 0
+    misses: int = 0
 
     def __len__(self):
         return len(self.players)
@@ -55,7 +55,7 @@ class Team():
     def to_json(self):
         return {
             'intercepts': self.intercepts,
-            'miscommunications': self.intercepts,
+            'misses': self.misses,
             'players': [p.name for p in self.players],
         }
 
