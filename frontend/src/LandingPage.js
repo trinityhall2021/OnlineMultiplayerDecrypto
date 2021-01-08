@@ -5,8 +5,15 @@ import history from './history'
 
 function submitNameAndJoinGame(name) {
     console.log(name);
-    history.push('/game')
-    socket.emit("submit_name", name );
+    let room_id = 'main'
+    socket.emit(
+      "submit_name",
+      {
+        player_name: name,
+        room_id: room_id,
+      }
+    );
+    history.push(`/game?room_id=${room_id}&name=${name}`)
 }
 
 class LandingPage extends Component {

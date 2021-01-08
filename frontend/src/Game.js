@@ -16,13 +16,20 @@ class Game extends Component {
       red_team: {players: []},
       blue_team: {players: []},
     };
+    console.log(socket)
+    console.log(socket.io.opts.query)
+    fetch('/state?room_id=main')
+      .then((resp) => resp.json())
+      .then((data) => {
+        console.log(data)
+        this.setState(data);
+      });
   }
   componentDidMount() {
     socket.on('player_added', (msg) => {
       this.setState(msg)
     });
   }
-
   render() {
     console.log(this.state.gameState)
     return (
