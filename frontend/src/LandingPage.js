@@ -14,12 +14,15 @@ function submitNameAndJoinGame(name) {
       }
     );
     history.push(`/game?room_id=${room_id}&name=${name}`)
+    history.push('/game');
 }
 
 class LandingPage extends Component {
   render() {
     return (
         <div>
+        <link href="https://fonts.googleapis.com/css2?family=Cutive+Mono&display=swap" rel="stylesheet" />          
+        <h1>Decrypto</h1>
             <input type="text" id="fname" name="fname" />
             <button onClick={() => 
                 submitNameAndJoinGame(document.getElementById("fname").value)}>
