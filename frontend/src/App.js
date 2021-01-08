@@ -1,10 +1,10 @@
 import React, { Component } from "react";
 import "./App.css";
 import Game from "./Game";
-import LandingPage from "./LandingPage"
-import {Router, Switch, Route} from 'react-router-dom'
+import LandingPage from "./LandingPage";
+import { Router, Switch, Route } from "react-router-dom";
 
-import history from './history'
+import history from "./history";
 
 class App extends Component {
   render() {

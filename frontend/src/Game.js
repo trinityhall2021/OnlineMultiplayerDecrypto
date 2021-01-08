@@ -4,42 +4,50 @@ import { DISPLAY_CODE, SUBMIT_GUESS, INTERCEPT, GameState } from "./GameState";
 import Player from "./Player";
 import Team from "./Team";
 import WordCard from "./WordCard";
-import socket from './Socket'
-
+import socket from "./Socket";
 
 class Game extends Component {
   constructor(props) {
     super(props);
+    const urlParams = new URLSearchParams(window.location.search);
+    const userName = urlParams.get("name");
     this.state = {
+      userName: userName,
       gameState: SUBMIT_GUESS,
       codecard: ["0", "0", "0"],
-      red_team: {players: []},
-      blue_team: {players: []},
+      red_team: { players: [] },
+      blue_team: { players: [] },
     };
-    console.log(socket)
-    console.log(socket.io.opts.query)
-    fetch('/state?room_id=main')
+    console.log(socket);
+    console.log(socket.io.opts.query);
+    fetch("/state?room_id=main")
       .then((resp) => resp.json())
       .then((data) => {
-        console.log(data)
+        console.log(data);
         this.setState(data);
       });
   }
   componentDidMount() {
-    socket.on('player_added', (msg) => {
-      this.setState(msg)
+    socket.on("player_added", (msg) => {
+      this.setState(msg);
     });
   }
   render() {
-    console.log(this.state.gameState)
+    console.log(this.state.gameState);
     return (
       <div className="Game">
         <h1>DECRYPTO</h1>
         <h2>USER INFO</h2>
-        <Player name="User1" team="RED" />
-        <button onClick={()=>this.setState({gameState:SUBMIT_GUESS})}>SUBMIT_GUESS</button>
-        <button onClick={()=>this.setState({gameState:INTERCEPT})}>INTERCEPT</button>
-        <button onClick={()=>this.setState({gameState:DISPLAY_CODE})}>DISPLAY_CODE</button>
+        <Player name={this.state.userName} team="RED" />
+        <button onClick={() => this.setState({ gameState: SUBMIT_GUESS })}>
+          SUBMIT_GUESS
+        </button>
+        <button onClick={() => this.setState({ gameState: INTERCEPT })}>
+          INTERCEPT
+        </button>
+        <button onClick={() => this.setState({ gameState: DISPLAY_CODE })}>
+          DISPLAY_CODE
+        </button>
         <h2>WORDCARDS</h2>
         <div className="flex-container">
           <div className="flex-container column">
@@ -87,4 +95,3 @@ class Game extends Component {
 }
 
 export default Game;
-

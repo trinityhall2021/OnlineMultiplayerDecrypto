@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import socket from './Socket'
+import socket from "./Socket";
 
 export const SUBMIT_GUESS = 0;
 export const INTERCEPT = 1;
@@ -123,6 +123,6 @@ export function GameState(props) {
     return <Submit type={props.gameState} />;
   }
   if (props.gameState === DISPLAY_CODE) {
-    return <DisplayCode/>;
+    return <DisplayCode />;
   }
 }
