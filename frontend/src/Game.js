@@ -9,7 +9,7 @@ class Game extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      game_state: DISPLAY_CODE,
+      gameState: SUBMIT_GUESS,
       codecard: ["0", "0", "0"],
       red_team_players: ["User1"],
       blue_team_players: ["User2"],
@@ -24,11 +24,15 @@ class Game extends Component {
   }
 
   render() {
+    console.log(this.state.gameState)
     return (
       <div className="Game">
         <h1>DECRYPTO</h1>
         <h2>USER INFO</h2>
         <Player name="User1" team="RED" />
+        <button onClick={()=>this.setState({gameState:SUBMIT_GUESS})}>SUBMIT_GUESS</button>
+        <button onClick={()=>this.setState({gameState:INTERCEPT})}>INTERCEPT</button>
+        <button onClick={()=>this.setState({gameState:DISPLAY_CODE})}>DISPLAY_CODE</button>
         <h2>WORDCARDS</h2>
         <div className="flex-container">
           <div className="flex-container column">
@@ -51,7 +55,7 @@ class Game extends Component {
 
         <h2>ACTION</h2>
         <GameState
-          gamestate={this.state.game_state}
+          gameState={this.state.gameState}
           codecard={this.state.codecard}
         />
 
