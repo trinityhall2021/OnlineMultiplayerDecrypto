@@ -6,7 +6,8 @@ export const INTERCEPT = 1;
 export const DISPLAY_CODE = 2;
 
 const ENDPOINT = "http://127.0.0.1:5000";
-const socket = socketIOClient(ENDPOINT);
+const socket = socketIOClient(
+  ENDPOINT, {query: 'room_id=main'});
 
 class Submit extends Component {
   constructor(props) {
@@ -15,7 +16,6 @@ class Submit extends Component {
       code_1: "1",
       code_2: "2",
       code_3: "3",
-      type: props.type,
     };
     this.handleChange = this.handleChange.bind(this);
   }
@@ -28,11 +28,11 @@ class Submit extends Component {
   render() {
     let title = "";
     let buttonFunction = null;
-    if (this.state.type === SUBMIT_GUESS) {
+    if (this.props.type === SUBMIT_GUESS) {
       title = "Submit Guess";
       buttonFunction = submitGuess;
     }
-    if (this.state.type === INTERCEPT) {
+    if (this.props.type === INTERCEPT) {
       title = "Intercept Guess";
       buttonFunction = interceptGuess;
     }
@@ -89,6 +89,11 @@ socket.on("guess_submitted", (msg) => {
   console.log("guess submitted!");
 });
 
+socket.on("player_added", (msg) => {
+  console.log(msg);
+  console.log("player added!");
+});
+
 class DisplayCode extends Component {
   constructor(props) {
     super(props);
@@ -119,23 +124,14 @@ class DisplayCode extends Component {
   }
 }
 
-export class GameState extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      gamestate: props.gamestate,
-      codecard: props.codecard,
-    };
+export function GameState(props) {
+  if (props.gameState === SUBMIT_GUESS) {
+    return <Submit type={props.gameState} />;
   }
-
-  render() {
-    if (
-      this.state.gamestate === SUBMIT_GUESS ||
-      this.state.gamestate === INTERCEPT
-    ) {
-      return <Submit type={this.state.gamestate} />;
-    } else if (this.state.gamestate === DISPLAY_CODE) {
-      return <DisplayCode/>;
-    }
+  if (props.gameState === INTERCEPT) {
+    return <Submit type={props.gameState} />;
+  }
+  if (props.gameState === DISPLAY_CODE) {
+    return <DisplayCode/>;
   }
 }
