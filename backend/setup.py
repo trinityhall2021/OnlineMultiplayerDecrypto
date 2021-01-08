@@ -8,5 +8,5 @@ setuptools.setup(
     description='Decrypto multiplayer backend',
     author='Cory Nezin',
     packages=setuptools.find_packages(),
-    install_requires=['flask-socketio', 'eventlet'],
+    install_requires=['flask-socketio', 'eventlet', 'namegenerator'],
 )
