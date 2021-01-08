@@ -71,19 +71,25 @@ class Game():
 GAMES = defaultdict(Game)
 
 
-@app.route('/user')
-def user():
-    return '"brenda"'
-
-@socketio.on('connect')
-def connect(methods=['GET', 'PUT', 'POST']):
+@app.route('/state')
+def state():
     room_id = request.args['room_id']
     game = GAMES[room_id]
-    logger.info('connect')
-    logger.info(game)
+    return {
+        'red_team': game.red_team.to_json(),
+        'blue_team': game.blue_team.to_json(),
+    }
+
+@socketio.on('submit_name')
+def submit_name(json, methods=['GET', 'PUT', 'POST']):
+    logger.info('submit_name')
+    logger.info(json)
+    room_id = json['room_id']
+    player_name = json['player_name']
+    game = GAMES[room_id]
     team = game.smaller_team()
     player = Player(
-        name=namegenerator.gen(),
+        name=player_name,
     )
     team.add_player(player)
     socketio.emit(
@@ -93,6 +99,10 @@ def connect(methods=['GET', 'PUT', 'POST']):
             'blue_team': game.blue_team.to_json(),
         }
     )
+
+@socketio.on('connect')
+def connect(methods=['GET', 'PUT', 'POST']):
+    logger.info('connecting')
 
 @socketio.on('submit_guess')
 def guess_submitted(json, methods=['GET', 'PUT', 'POST']):
@@ -105,12 +115,6 @@ def request_clue(methods=['GET', 'POST']):
     current_codecard = next(codecards)
     print("Clue requested : " + str(current_codecard))
     return jsonify({"codecard": current_codecard})
-
-@socketio.on('submit_name')
-def submit_name(json, methods=['GET', 'POST', 'PUT']):
-    print('name received: ' + str(json))
-    # TODO: logic to add a new player
-
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
