@@ -5,7 +5,7 @@ import uuid
 import logging
 import dataclasses
 from itertools import permutations, cycle
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from collections import defaultdict
 
 from flask import Flask, render_template, request
@@ -32,6 +32,15 @@ codecards = cycle(iter(codecards))
 class TeamColor(str, enum.Enum):
     Red = 'red'
     Blue = 'blue'
+    Invalid = 'invalid'
+
+
+def other_team_color(team: TeamColor):
+    if team == TeamColor.Red:
+        return TeamColor.Blue
+    if team == TeamColor.Blue:
+        return TeamColor.Red
+    return TeamColor.Invalid
 
 
 class PlayerState(str, enum.Enum):
@@ -39,6 +48,7 @@ class PlayerState(str, enum.Enum):
     Intercepting = 'intercepting'
     Giving = 'giving'
     Receiving = 'receiving'
+
 
 @dataclasses.dataclass
 class Player():
@@ -70,6 +80,12 @@ class Team():
         player.team = self
         self.players.append(player)
 
+    def next_clue_giver(self):
+        for n, player in enumerate(self.players):
+            if player.state == PlayerState.Giving:
+                return self.players[(n+1) % len(self.players)]
+        raise ValueError()
+
     def to_json(self):
         return {
             'intercepts': self.intercepts,
@@ -82,9 +98,31 @@ class Team():
 class Game():
     red_team: Team = dataclasses.field(default_factory=Team)
     blue_team: Team = dataclasses.field(default_factory=Team)
+    code: Optional[Tuple[int]] = None
+    normal_guess: Optional[Tuple[int]] = None
+    intercept_guess: Optional[Tuple[int]] = None
+
+    def get_team(self, team_color: TeamColor):
+        if team_color == TeamColor.Blue:
+            return self.blue_team
+        elif team_color == TeamColor.Red:
+            return self.red_team
+        else:
+            raise ValueError()
 
     def smaller_team(self):
         return min(self.red_team, self.blue_team, key=lambda t: len(t))
+
+    def update_player_states(self):
+        normal_team = self.get_team_turn()
+        intercepting_team = other_team_color(normal_team)
+        if self.normal_guess and self.intercept_guess:
+            clue_giver = intercepting_team.next_clue_giver()
+            for player in normal_team:
+                player.state = PlayerState.Intercepting
+            for player in intercepting_team:
+                player.state = PlayerState.Receiving
+            clue_giver.state = PlayerState.Giving
 
 
 GAMES = defaultdict(Game)
@@ -104,6 +142,21 @@ def state():
         'blue_team': game.blue_team.to_json(),
         'team': team_color
     }
+
+@socketio.on('submit_guess')
+def submit_guess(json, methods=['GET', 'PUT', 'POST']):
+    room_id = json['room_id']
+    guess = json['guess']
+    guess_type = json['guess_type']
+    game = GAMES[room_id]
+    if guess_type == 'intercept':
+        game.intercept_guess = tuple(guess)
+    if guess_type == 'normal':
+        game.normal_guess = tuple(guess)
+    if game.intercept_guess and game.normal_guess:
+        game.tally_score()
+    game.update_player_states()
+
 
 @socketio.on('submit_name')
 def submit_name(json, methods=['GET', 'PUT', 'POST']):
@@ -128,11 +181,6 @@ def submit_name(json, methods=['GET', 'PUT', 'POST']):
 @socketio.on('connect')
 def connect(methods=['GET', 'PUT', 'POST']):
     logger.info('connecting')
-
-@socketio.on('submit_guess')
-def guess_submitted(json, methods=['GET', 'PUT', 'POST']):
-    print(json)
-    socketio.emit('guess_submitted', json)
 
 @app.route('/requestClue')
 def request_clue(methods=['GET', 'POST']):
