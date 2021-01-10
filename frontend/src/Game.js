@@ -15,8 +15,8 @@ class Game extends Component {
       userName: userName,
       gameState: SUBMIT_GUESS,
       codecard: ["0", "0", "0"],
-      red_team: { players: [] , words: []},
-      blue_team: { players: [], words: []},
+      red_team: { players: [], words: [] },
+      blue_team: { players: [], words: [] },
     };
     console.log(socket);
     console.log(socket.io.opts.query);
@@ -36,19 +36,19 @@ class Game extends Component {
   render() {
     console.log(this.state.gameState);
     let word_list = [];
-    if (this.state.userTeam === "red") {
+    if (this.state.team === "red") {
       word_list = this.state.red_team.words;
-    } else if (this.state.userTeam === "blue"){
+    } else if (this.state.team === "blue") {
       word_list = this.state.blue_team.words;
     } else {
-      word_list = []
+      word_list = [];
     }
 
     return (
       <div className="Game">
         <h1>DECRYPTO</h1>
         <h2>USER INFO</h2>
-        <Player name={this.state.userName} team={this.state.userTeam} />
+        <Player name={this.state.userName} team={this.state.team} />
         <button onClick={() => this.setState({ gameState: SUBMIT_GUESS })}>
           SUBMIT_GUESS
         </button>
@@ -59,7 +59,7 @@ class Game extends Component {
           DISPLAY_CODE
         </button>
         <h2>WORDCARDS</h2>
-          <WordCardList word_list={word_list} />
+        <WordCardList word_list={word_list} />
         <h2>ACTION</h2>
         <GameState
           gameState={this.state.gameState}
