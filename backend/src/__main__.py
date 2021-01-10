@@ -19,7 +19,8 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'helloworld'
 socketio = SocketIO(app, cors_allowed_origins="*")
-WORD_LIST = ["ANT", "BEE", "CAT", "DOG", "EGG", "FAT", "GOAT", "HAT", "ICE", "JELLY", "KING"]
+WORD_LIST = ["ANT", "BEE", "CAT", "DOG", "EGG", "FAT", "GOAT", "HAT", "ICE",
+             "JELLY", "KING"]
 
 # TODO: setup UUID mechanisms so different rooms do not draw from 
 # the same deck of codecards
@@ -28,22 +29,29 @@ random.shuffle(codecards)
 codecards = cycle(iter(codecards))
 
 
-class PlayerState(str, enum.Enum):
-    INTERCEPTING: 'INTERCEPTING'
-    GIVING: 'GIVING'
-    RECEIVING: 'RECEIVING'
+class TeamColor(str, enum.Enum):
+    Red = 'red'
+    Blue = 'blue'
 
+
+class PlayerState(str, enum.Enum):
+    Waiting = 'waiting'
+    Intercepting = 'intercepting'
+    Giving = 'giving'
+    Receiving = 'receiving'
 
 @dataclasses.dataclass
 class Player():
     name: str
+    state: PlayerState = PlayerState.Waiting
     team: Optional[Team] = None
+
+    def to_json():
+        return {'name': name, 'state': state}
 
 def generate_word_list():
     # TODO: seed the random? 
     return random.sample(WORD_LIST, k=4)
-
-
 
 @dataclasses.dataclass
 class Team():
@@ -54,6 +62,9 @@ class Team():
 
     def __len__(self):
         return len(self.players)
+
+    def user_in_team(self, name: str):
+        return name in [p.name for p in self.players]
 
     def add_player(self, player):
         player.team = self
@@ -82,10 +93,16 @@ GAMES = defaultdict(Game)
 @app.route('/state')
 def state():
     room_id = request.args['room_id']
+    user = request.args['user']
     game = GAMES[room_id]
+    if game.red_team.user_in_team(user):
+        team_color = TeamColor.Red
+    else:
+        team_color = TeamColor.Blue
     return {
         'red_team': game.red_team.to_json(),
         'blue_team': game.blue_team.to_json(),
+        'team': team_color
     }
 
 @socketio.on('submit_name')
