@@ -15,8 +15,8 @@ class Game extends Component {
       userName: userName,
       gameState: SUBMIT_GUESS,
       codecard: ["0", "0", "0"],
-      red_team: { players: [] },
-      blue_team: { players: [] },
+      red_team: { players: [] , words: []},
+      blue_team: { players: [], words: []},
     };
     console.log(socket);
     console.log(socket.io.opts.query);

@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'helloworld'
 socketio = SocketIO(app, cors_allowed_origins="*")
+WORD_LIST = ["ANT", "BEE", "CAT", "DOG", "EGG", "FAT", "GOAT", "HAT", "ICE", "JELLY", "KING"]
 
 # TODO: setup UUID mechanisms so different rooms do not draw from 
 # the same deck of codecards
@@ -38,10 +39,16 @@ class Player():
     name: str
     team: Optional[Team] = None
 
+def generate_word_list():
+    # TODO: seed the random? 
+    return random.sample(WORD_LIST, k=4)
+
+
 
 @dataclasses.dataclass
 class Team():
     players: List[Player] = dataclasses.field(default_factory=list)
+    word_list: List[str] = dataclasses.field(default_factory=generate_word_list)
     intercepts: int = 0
     misses: int = 0
 
@@ -57,6 +64,7 @@ class Team():
             'intercepts': self.intercepts,
             'misses': self.misses,
             'players': [p.name for p in self.players],
+            'words': self.word_list
         }
 
 @dataclasses.dataclass
