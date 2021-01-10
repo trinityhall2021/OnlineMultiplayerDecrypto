@@ -1,5 +1,6 @@
 import WordCard from "./WordCard";
 
+
 function WordCardList(props) {
     // TODO: Check whether there are 4 words in the word card list 
     const word_card_list = [];
@@ -12,3 +13,5 @@ function WordCardList(props) {
         </div>
     )
 }
+
+export default WordCardList;

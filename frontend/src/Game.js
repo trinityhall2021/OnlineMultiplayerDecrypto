@@ -3,7 +3,7 @@ import "./Game.css";
 import { DISPLAY_CODE, SUBMIT_GUESS, INTERCEPT, GameState } from "./GameState";
 import Player from "./Player";
 import Team from "./Team";
-import WordCard from "./WordCard";
+import WordCardList from "./WordCardList";
 import socket from "./Socket";
 
 class Game extends Component {
@@ -20,7 +20,8 @@ class Game extends Component {
     };
     console.log(socket);
     console.log(socket.io.opts.query);
-    fetch("/state?room_id=main")
+    // TODO: Sanitize inputs
+    fetch(`/state?room_id=main&user=${userName}`)
       .then((resp) => resp.json())
       .then((data) => {
         console.log(data);
@@ -34,11 +35,20 @@ class Game extends Component {
   }
   render() {
     console.log(this.state.gameState);
+    let word_list = [];
+    if (this.state.userTeam === "red") {
+      word_list = this.state.red_team.words;
+    } else if (this.state.userTeam === "blue"){
+      word_list = this.state.blue_team.words;
+    } else {
+      word_list = []
+    }
+
     return (
       <div className="Game">
         <h1>DECRYPTO</h1>
         <h2>USER INFO</h2>
-        <Player name={this.state.userName} team="RED" />
+        <Player name={this.state.userName} team={this.state.userTeam} />
         <button onClick={() => this.setState({ gameState: SUBMIT_GUESS })}>
           SUBMIT_GUESS
         </button>
@@ -49,25 +59,7 @@ class Game extends Component {
           DISPLAY_CODE
         </button>
         <h2>WORDCARDS</h2>
-        <div className="flex-container">
-          <div className="flex-container column">
-            <WordCard word="1" />
-            <WordCard word="HELLO" />
-          </div>
-          <div className="flex-container column">
-            <WordCard word="2" />
-            <WordCard word="WORLD" />
-          </div>
-          <div className="flex-container column">
-            <WordCard word="3" />
-            <WordCard word="WEIRD" />
-          </div>
-          <div className="flex-container column">
-            <WordCard word="4" />
-            <WordCard word="FLEX" />
-          </div>
-        </div>
-
+          <WordCardList word_list={word_list} />
         <h2>ACTION</h2>
         <GameState
           gameState={this.state.gameState}
