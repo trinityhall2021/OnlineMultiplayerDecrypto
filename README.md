@@ -17,3 +17,7 @@ Run
 ```
 npm start
 ```
+
+## Licensing
+
+???
