@@ -5,13 +5,13 @@ import uuid
 import logging
 import dataclasses
 from itertools import permutations, cycle
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, DefaultDict
 from collections import defaultdict
 
 from flask import Flask, render_template, request
 from flask.json import jsonify
-from flask_socketio import SocketIO
-import namegenerator
+from flask_socketio import SocketIO # type: ignore
+import namegenerator # type: ignore
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -26,9 +26,9 @@ WORD_LIST = [
 
 # TODO: setup UUID mechanisms so different rooms do not draw from
 # the same deck of codecards
-codecards = list(permutations(range(1, 5), 3))
-random.shuffle(codecards)
-codecards = cycle(iter(codecards))
+codecards_list = list(permutations(range(1, 5), 3))
+random.shuffle(codecards_list)
+codecards = cycle(iter(codecards_list))
 
 NUM_INTERCEPTS_TO_WIN = 2
 NUM_MISSES_TO_LOSE = 2
@@ -120,12 +120,13 @@ class Game():
     code_card: Optional[Tuple[int]] = None
     normal_guess: Optional[Tuple[int]] = None
     intercept_guess: Optional[Tuple[int]] = None
-    starting_team: int = TeamColor.Red
+    starting_team: TeamColor = TeamColor.Red
 
-    def get_player(self, user: str) -> Player:
+    def get_player(self, user: str) -> Optional[Player]:
         for player in self.red_team.players + self.blue_team.players:
             if player.name == user:
                 return player
+        return None
 
     def get_team(self, team_color: TeamColor):
         if team_color == TeamColor.Blue:
@@ -222,7 +223,7 @@ class Game():
                 self.blue_team.endgame = EndCondition.Tie
 
 
-GAMES = defaultdict(Game)
+GAMES: DefaultDict[str, Game] = defaultdict(Game)
 
 
 @app.route('/state')
