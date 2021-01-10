@@ -1,39 +1,23 @@
-# OnlineMultiplayerDecrypto
+# Decrypto
 
-Online Multiplayer Decrypto
+Online version of the [Decrypto](https://boardgamegeek.com/boardgame/225694/decrypto) board game
 
-## Frontend
+## Running the game
 
-```
-cd frontend
-```
+First run the backend
 
-```
-npm install
-```
-
-```
-npm start
-```
-
-## Licensing
-
-???
-
-## Backend
-
-```
+```bash
 cd backend
+python3 setup.py install
+python3 src # ??? idk
+cd ..
 ```
 
-```
-python -m venv venv
-```
+Then launch the frontend
 
-```
-python -m pip install -e .
-```
-
-```
-python -m src
+```bash
+cd frontend
+yarn install
+yarn start
+cd ..
 ```

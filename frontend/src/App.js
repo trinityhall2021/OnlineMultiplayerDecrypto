@@ -1,24 +1,27 @@
 import React, { Component } from "react";
-import "./App.css";
-import Game from "./Game";
-import LandingPage from "./LandingPage";
 import { Router, Switch, Route } from "react-router-dom";
+import 'tabler-react/dist/Tabler.css';
 
-import history from "./history";
+import {
+  LandingPage,
+  GamePage,
+} from './Pages';
 
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <Router history={history}>
-          <Switch>
-            <Route path="/game" exact component={Game} />
-            <Route path="/" exact component={LandingPage} />
-          </Switch>
-        </Router>
-      </div>
-    );
-  }
-}
+import {
+  history,
+} from './Components';
 
+const App = () => {
+  return (
+    <React.StrictMode>
+      <Router history={history}>
+        <Switch>
+          <Route exact path="/game" component={GamePage} />
+          <Route exact path="/" component={LandingPage} />
+        </Switch>
+      </Router>
+    </React.StrictMode>
+  );
+};
+  
 export default App;
