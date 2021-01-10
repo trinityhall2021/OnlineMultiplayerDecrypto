@@ -33,3 +33,7 @@ python -m venv venv
 ```
 python -m pip install -e .
 ```
+
+```
+python -m src
+```
