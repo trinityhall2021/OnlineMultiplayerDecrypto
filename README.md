@@ -2,17 +2,15 @@
 
 Online Multiplayer Decrypto
 
-## Install
+## Frontend
 
-Run
+```
+cd frontend
+```
 
 ```
 npm install
 ```
-
-## Running
-
-Run
 
 ```
 npm start
@@ -21,3 +19,17 @@ npm start
 ## Licensing
 
 ???
+
+## Backend
+
+```
+cd backend
+```
+
+```
+python -m venv venv
+```
+
+```
+python -m pip install -e .
+```
