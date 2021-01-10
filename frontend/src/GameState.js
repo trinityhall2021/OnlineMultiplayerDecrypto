@@ -72,24 +72,28 @@ class Submit extends Component {
 function submitGuess(code) {
   const urlParams = new URLSearchParams(window.location.search);
   const roomId = urlParams.get("room_id");
+  const user = urlParams.get("name");
   socket.emit(
     "submit_guess",
     {
       'guess': code,
       'guess_type': 'normal',
-      'room_id': roomId
+      'room_id': roomId,
+      'user': user,
     });
 }
 
 function interceptGuess(code) {
   const urlParams = new URLSearchParams(window.location.search);
   const roomId = urlParams.get("room_id");
+  const user = urlParams.get("name");
   socket.emit(
     "submit_guess",
     {
       'guess': code,
       'guess_type': 'intercept',
-      'room_id': roomId
+      'room_id': roomId,
+      'user': user,
     });
 }
 

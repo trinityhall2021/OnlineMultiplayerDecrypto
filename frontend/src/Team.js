@@ -1,8 +1,8 @@
 function Team(props) {
   const team_players = [];
-
   for (let i = 0; i < props.team_players.length; i++) {
-    team_players.push(<p>{props.team_players[i]}</p>);
+    team_players.push(
+      <p>{props.team_players[i].name} ({props.team_players[i].state})</p>);
   }
   return (
     <div>
