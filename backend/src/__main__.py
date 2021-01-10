@@ -19,10 +19,12 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'helloworld'
 socketio = SocketIO(app, cors_allowed_origins="*")
-WORD_LIST = ["ANT", "BEE", "CAT", "DOG", "EGG", "FAT", "GOAT", "HAT", "ICE",
-             "JELLY", "KING"]
+WORD_LIST = [
+    "ANT", "BEE", "CAT", "DOG", "EGG", "FAT", "GOAT", "HAT", "ICE", "JELLY",
+    "KING"
+]
 
-# TODO: setup UUID mechanisms so different rooms do not draw from 
+# TODO: setup UUID mechanisms so different rooms do not draw from
 # the same deck of codecards
 codecards = list(permutations(range(1, 5), 3))
 random.shuffle(codecards)
@@ -30,6 +32,7 @@ codecards = cycle(iter(codecards))
 
 NUM_INTERCEPTS_TO_WIN = 2
 NUM_MISSES_TO_LOSE = 2
+
 
 class TeamColor(str, enum.Enum):
     Red = 'red'
@@ -71,14 +74,15 @@ class Player():
 
 
 def generate_word_list():
-    # TODO: seed the random? 
+    # TODO: seed the random?
     return random.sample(WORD_LIST, k=4)
 
 
 @dataclasses.dataclass
 class Team():
     players: List[Player] = dataclasses.field(default_factory=list)
-    word_list: List[str] = dataclasses.field(default_factory=generate_word_list)
+    word_list: List[str] = dataclasses.field(
+        default_factory=generate_word_list)
     num_code_gives: int = 0
     intercepts: int = 0
     misses: int = 0
@@ -98,7 +102,7 @@ class Team():
         self.players.append(player)
 
     def next_clue_giver(self):
-        return self.players[(self.num_code_gives+1) % len(self.players)]
+        return self.players[(self.num_code_gives + 1) % len(self.players)]
 
     def to_json(self):
         return {
@@ -107,6 +111,7 @@ class Team():
             'players': [p.to_json() for p in self.players],
             'words': self.word_list
         }
+
 
 @dataclasses.dataclass
 class Game():
@@ -131,7 +136,7 @@ class Game():
             raise ValueError(f'Cannot get invalid team color: {team_color}')
 
     def get_team_turn(self):
-        # return the current team's turn (defined by the player who is 
+        # return the current team's turn (defined by the player who is
         # currently the cluegiver)
         logger.info('getting team turn')
         for player in self.red_team:
@@ -140,7 +145,7 @@ class Game():
         for player in self.blue_team:
             if player.state == PlayerState.Giving:
                 return TeamColor.Blue
-        # Todo: return an error code? 
+        # Todo: return an error code?
         return TeamColor.Invalid
 
     def smaller_team(self):
@@ -172,14 +177,14 @@ class Game():
             self.red_team.misses += 1
         elif (current_team == TeamColor.Blue):
             self.blue_team.misses += 1
-        # TODO: return error code? 
+        # TODO: return error code?
 
     def increase_intercepts(self, current_team):
         if (current_team == TeamColor.Red):
             self.red_team.intercepts += 1
         elif (current_team == TeamColor.Blue):
             self.blue_team.intercepts += 1
-        # TODO: return error code? 
+        # TODO: return error code?
 
     def tally_score(self):
         current_team = self.get_team_turn()
@@ -189,8 +194,8 @@ class Game():
             logger.error('Both guesses must be supplied to tally score')
             return
 
-        if self.code_card != self.normal_guess: 
-            self.increase_misses(current_team) 
+        if self.code_card != self.normal_guess:
+            self.increase_misses(current_team)
         if self.code_card == self.intercept_guess:
             self.increase_intercepts(opposing_team)
 
@@ -199,18 +204,18 @@ class Game():
 
     def calculate_win_condition(self):
         # If a team has two miscommunications, the team looses
-        # If a team has two intercepts, the team wins 
-        # return 0 if a win condition is not calculated, return 1 if a 
-        # win condition is calculated 
+        # If a team has two intercepts, the team wins
+        # return 0 if a win condition is not calculated, return 1 if a
+        # win condition is calculated
 
-        if (self.red_team.misses != NUM_MISSES_TO_LOSE and
-            self.blue_team.misses != NUM_MISSES_TO_LOSE and
-            self.red_team.intercepts != NUM_INTERCEPTS_TO_WIN and
-            self.blue_team.intercepts != NUM_INTERCEPTS_TO_WIN):
+        if (self.red_team.misses != NUM_MISSES_TO_LOSE
+                and self.blue_team.misses != NUM_MISSES_TO_LOSE
+                and self.red_team.intercepts != NUM_INTERCEPTS_TO_WIN
+                and self.blue_team.intercepts != NUM_INTERCEPTS_TO_WIN):
             return 0
         # end game condition is met, now we see whether is a win/lose situation or a tie
         if (self.red_team.intercepts == NUM_INTERCEPTS_TO_WIN):
-            # red team has the intercepts to win, check whether blue team has that 
+            # red team has the intercepts to win, check whether blue team has that
             # as well
             if (self.blue_team.intercepts == NUM_INTERCEPTS_TO_WIN):
                 self.red_team.endgame = EndCondition.Tie
@@ -234,6 +239,7 @@ def state():
         'blue_team': game.blue_team.to_json(),
         'team': team_color
     }
+
 
 @socketio.on('submit_guess')
 def submit_guess(json, methods=['GET', 'PUT', 'POST']):
@@ -287,9 +293,7 @@ def submit_name(json, methods=['GET', 'PUT', 'POST']):
         team = game.get_team(game.starting_team)
     else:
         team = game.smaller_team()
-    player = Player(
-        name=player_name,
-    )
+    player = Player(name=player_name, )
     team.add_player(player)
     game.update_player_states_after_join()
     message = {
@@ -299,9 +303,11 @@ def submit_name(json, methods=['GET', 'PUT', 'POST']):
     logger.info(message)
     socketio.emit('player_added', message)
 
+
 @socketio.on('connect')
 def connect(methods=['GET', 'PUT', 'POST']):
     logger.info('connecting')
+
 
 @app.route('/requestClue')
 def request_clue(methods=['GET', 'POST']):
@@ -309,6 +315,7 @@ def request_clue(methods=['GET', 'POST']):
     current_codecard = next(codecards)
     print("Clue requested : " + str(current_codecard))
     return jsonify({"codecard": current_codecard})
+
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
