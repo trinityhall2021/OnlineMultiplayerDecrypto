@@ -37,23 +37,21 @@ NUM_MISSES_TO_LOSE = 2
 class TeamColor(str, enum.Enum):
     Red = 'red'
     Blue = 'blue'
-    Invalid = 'invalid'
 
-
-def other_team_color(team: TeamColor):
-    if team == TeamColor.Red:
-        return TeamColor.Blue
-    if team == TeamColor.Blue:
-        return TeamColor.Red
-    logger.warning('invalid team color: %s', team)
-    return TeamColor.Invalid
+    @classmethod
+    def other(cls, team_color: TeamColor):
+        return {TeamColor.Red: TeamColor.Blue,
+                TeamColor.Blue: TeamColor.Red}[team_color]
 
 
 class PlayerState(str, enum.Enum):
     Waiting = 'waiting'
     Intercepting = 'intercepting'
+    Intercepted = 'intercepted'
     Giving = 'giving'
-    Receiving = 'receiving'
+    Gave = 'gave'
+    Guessing = 'guessing'
+    Guessed = 'guessed'
 
 
 class EndCondition(str, enum.Enum):
@@ -67,13 +65,12 @@ class EndCondition(str, enum.Enum):
 class Player():
     name: str
     state: PlayerState = PlayerState.Waiting
-    team: Optional[Team] = None
 
     def to_json(self):
         return {'name': self.name, 'state': self.state}
 
 
-def generate_word_list():
+def generate_words():
     # TODO: seed the random?
     return random.sample(WORD_LIST, k=4)
 
@@ -81,8 +78,7 @@ def generate_word_list():
 @dataclasses.dataclass
 class Team():
     players: List[Player] = dataclasses.field(default_factory=list)
-    word_list: List[str] = dataclasses.field(
-        default_factory=generate_word_list)
+    word_list: List[str] = dataclasses.field(default_factory=generate_words)
     num_code_gives: int = 0
     intercepts: int = 0
     misses: int = 0
@@ -98,7 +94,6 @@ class Team():
         return name in [p.name for p in self.players]
 
     def add_player(self, player):
-        player.team = self
         self.players.append(player)
 
     def next_clue_giver(self):
@@ -120,7 +115,9 @@ class Game():
     code_card: Optional[Tuple[int]] = None
     normal_guess: Optional[Tuple[int]] = None
     intercept_guess: Optional[Tuple[int]] = None
-    starting_team: TeamColor = TeamColor.Red
+
+    def __post_init__(self):
+        self.starting_team = self.red_team
 
     def get_player(self, user: str) -> Optional[Player]:
         for player in self.red_team.players + self.blue_team.players:
@@ -129,25 +126,17 @@ class Game():
         return None
 
     def get_team(self, team_color: TeamColor):
-        if team_color == TeamColor.Blue:
-            return self.blue_team
-        elif team_color == TeamColor.Red:
-            return self.red_team
-        else:
-            raise ValueError(f'Cannot get invalid team color: {team_color}')
+        return {TeamColor.Blue: self.blue_team,
+                TeamColor.Red: self.red_team}[team_color]
 
-    def get_team_turn(self):
-        # return the current team's turn (defined by the player who is
-        # currently the cluegiver)
-        logger.info('getting team turn')
+    def get_team_turns(self) -> Tuple[TeamColor, TeamColor]:
+        # Returns the guessing team and intercepting team respectively
         for player in self.red_team:
             if player.state == PlayerState.Giving:
-                return TeamColor.Red
+                return self.red_team, self.blue_team
         for player in self.blue_team:
             if player.state == PlayerState.Giving:
-                return TeamColor.Blue
-        # Todo: return an error code?
-        return TeamColor.Invalid
+                return self.blue_team, self.red_team
 
     def smaller_team(self):
         return min(self.red_team, self.blue_team, key=lambda t: len(t))
@@ -157,57 +146,63 @@ class Game():
             for player in self.blue_team:
                 player.state = PlayerState.Intercepting
             for player in self.red_team:
-                player.state = PlayerState.Receiving
+                player.state = PlayerState.Guessing
             self.red_team.players[0].state = PlayerState.Giving
 
     def update_player_states_after_guess(self):
-        normal_team_color = self.get_team_turn()
-        normal_team = self.get_team(normal_team_color)
-        intercepting_team = self.get_team(other_team_color(normal_team_color))
+        normal_team, intercepting_team = self.get_team_turns()
         if self.normal_guess and self.intercept_guess:
             normal_team.num_code_gives += 1
             clue_giver = intercepting_team.next_clue_giver()
             for player in normal_team:
                 player.state = PlayerState.Intercepting
             for player in intercepting_team:
-                player.state = PlayerState.Receiving
+                player.state = PlayerState.Guessing
             clue_giver.state = PlayerState.Giving
 
-    def increase_misses(self, current_team):
-        if (current_team == TeamColor.Red):
-            self.red_team.misses += 1
-        elif (current_team == TeamColor.Blue):
-            self.blue_team.misses += 1
-        # TODO: return error code?
-
-    def increase_intercepts(self, current_team):
-        if (current_team == TeamColor.Red):
-            self.red_team.intercepts += 1
-        elif (current_team == TeamColor.Blue):
-            self.blue_team.intercepts += 1
-        # TODO: return error code?
-
     def tally_score(self):
-        current_team = self.get_team_turn()
-        opposing_team = other_team_color(current_team)
+        normal_team, intercepting_team = self.get_team_turns()
 
         if (self.normal_guess is None or self.intercept_guess is None):
             logger.error('Both guesses must be supplied to tally score')
             return
 
         if self.code_card != self.normal_guess:
-            self.increase_misses(current_team)
+            normal_team.misses += 1
         if self.code_card == self.intercept_guess:
-            self.increase_intercepts(opposing_team)
+            intercepting_team.intercepts += 1
 
-        if (current_team != self.starting_team):
-            calculate_win_condition()
+        if (normal_team != self.starting_team):
+            self.calculate_win_condition()
 
     def calculate_win_condition(self):
-        # If a team has two miscommunications, the team looses
+        # If a team has two miscommunications, the team loses
         # If a team has two intercepts, the team wins
         # return 0 if a win condition is not calculated, return 1 if a
         # win condition is calculated
+
+        """ Cory's method:
+        blue_won = False
+        red_won = False
+        if self.red_team.misses == NUM_MISSES_TO_LOSE:
+            blue_won = True
+        if self.red_team.intercepts == NUM_INTERCEPTS_TO_WIN:
+            red_won = True
+        if self.blue_team.misses == NUM_MISSES_TO_LOSE:
+            red_won = True
+        if self.blue_team.intercepts == NUM_INTERCEPTS_TO_WIN:
+            blue_won = True
+        if red_won and blue_won:
+            self.red_team.endgame = EndCondition.Tie
+            self.blue_team.endgame = EndCondition.Tie
+        elif red_won:
+            self.red_team.endgame = EndCondition.Win
+        elif blue_won:
+            self.blue_team.endgame = EndCondition.Win
+        else:
+            self.red_team.engame = EndCondition.NotYet
+            self.blue_team.engame = EndCondition.NotYet
+        """
 
         if (self.red_team.misses != NUM_MISSES_TO_LOSE
                 and self.blue_team.misses != NUM_MISSES_TO_LOSE
@@ -263,7 +258,7 @@ def submit_guess(json, methods=['GET', 'PUT', 'POST']):
         else:
             logger.warning('player submitted invalid guess')
     if guess_type == 'normal':
-        if player.state == PlayerState.Receiving:
+        if player.state == PlayerState.Guessing:
             game.normal_guess = tuple(guess)
             should_update = True
         else:
@@ -291,7 +286,7 @@ def submit_name(json, methods=['GET', 'PUT', 'POST']):
     player_name = json['player_name']
     game = GAMES[room_id]
     if len(game.red_team) == 0 and len(game.blue_team) == 0:
-        team = game.get_team(game.starting_team)
+        team = game.starting_team
     else:
         team = game.smaller_team()
     player = Player(name=player_name, )
