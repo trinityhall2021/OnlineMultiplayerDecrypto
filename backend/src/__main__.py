@@ -64,7 +64,6 @@ class EndCondition(str, enum.Enum):
 @dataclasses.dataclass
 class Player():
     name: str
-    uuid: str = dataclasses.field(default_factory=lambda: uuid.uuid4().hex)
     state: PlayerState = PlayerState.Waiting
 
     def to_json(self):
@@ -303,8 +302,7 @@ def submit_name(json, methods=['GET', 'PUT', 'POST']):
     player = Player(name=player_name)
     team.add_player(player)
     game.update_player_states_after_join()
-    message = game.user_json(username=player_name)
-    message.update({'session': player.uuid})
+    message = game.to_json()
     logger.info(message)
     socketio.emit('player_added', message)
 
