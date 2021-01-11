@@ -99,6 +99,7 @@ class Game():
     normal_guess: Optional[Tuple[int]] = None
     intercept_guess: Optional[Tuple[int]] = None
     starting_team: int = TeamColor.Red
+    num_turns : int = 0
     
     def get_team_turn(self):
         # return the current team's turn (defined by the player who is 
@@ -154,32 +155,40 @@ class Game():
             increase_intercepts(opposing_team)
 
         if (current_team != self.starting_team):
-            calculate_win_condition()
+            self.num_turns += 1
+            # TODO: Emit a win / loss condition 
+            self.calculate_win_condition()
 
     def calculate_win_condition(self):
+        
         # If a team has two miscommunications, the team looses
         # If a team has two intercepts, the team wins 
         # return 0 if a win condition is not calculated, return 1 if a 
         # win condition is calculated 
-        
         if (self.red_team.misses != NUM_MISSES_TO_LOSE and \
             self.blue_team.misses != NUM_MISSES_TO_LOSE and \
             self.red_team.intercepts != NUM_INTERCEPTS_TO_WIN and \
-            self.blue_team.intercepts != NUM_INTERCEPTS_TO_WIN):
+            self.blue_team.intercepts != NUM_INTERCEPTS_TO_WIN and \
+            self.num_turns < 8):
             return 0
-        # end game condition is met, now we see whether is a win/lose situation or a tie
-        if (self.red_team.intercepts == NUM_INTERCEPTS_TO_WIN) {
-            # red team has the intercepts to win, check whether blue team has that 
-            # as well
-            if (self.blue_team.intercepts == NUM_INTERCEPTS_TO_WIN) {
-                self.red_team.endgame = EndCondition.Tie
-                self.blue_team.endgame = EndCondition.Tie
-            }
+        
+        # end game condition is met, now we tally the score
+        red_team_score = self.red_team.intercepts - self.red_team.misses
+        blue_team_score = self.blue_team.intercepts - self.blue_team.misses
+        if (red_team_score > blue_team_score) {
+            # red team wins, blue team loses
+            self.red_team.endgame = EndCondition.Win
+            self.blue_team.endgame = EndCondition.Loss
+        } else if (red_team_score < blue_team_score) {
+            # blue team wins, red team loses
+            self.red_team.endgame = EndCondition.Loss
+            self.blue_team.endgame = EndCondition.Win
         } else {
-            # red team didnt have the intercepts to win 
+            # it's a tie.
+            self.red_team.endgame = EndCondition.Tie
+            self.blue_team.endgame = EndCondition.Tie
         }
-        pass
-
+        return 1
 
 GAMES = defaultdict(Game)
 
