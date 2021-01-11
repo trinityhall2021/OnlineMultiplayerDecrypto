@@ -115,15 +115,6 @@ class Game():
     code_card: Optional[Tuple[int]] = None
     normal_guess: Optional[Tuple[int]] = None
     intercept_guess: Optional[Tuple[int]] = None
-<<<<<<< HEAD
-    starting_team: int = TeamColor.Red
-    num_turns : int = 0
-    
-    def get_team_turn(self):
-        # return the current team's turn (defined by the player who is 
-        # currently the cluegiver)
-        for player in self.red_team.players:
-=======
 
     def __post_init__(self):
         self.starting_team = self.red_team
@@ -141,7 +132,6 @@ class Game():
     def get_team_turns(self) -> Tuple[TeamColor, TeamColor]:
         # Returns the guessing team and intercepting team respectively
         for player in self.red_team:
->>>>>>> ee7884194841e7a6db4c350600548dc94350c542
             if player.state == PlayerState.Giving:
                 return self.red_team, self.blue_team
         for player in self.blue_team:
@@ -182,7 +172,6 @@ class Game():
         if self.code_card == self.intercept_guess:
             intercepting_team.intercepts += 1
 
-<<<<<<< HEAD
         if (current_team != self.starting_team):
             self.num_turns += 1
             # TODO: Emit a win / loss condition 
@@ -218,53 +207,7 @@ class Game():
             self.blue_team.endgame = EndCondition.Tie
         }
         return 1
-=======
-        if (normal_team != self.starting_team):
-            self.calculate_win_condition()
 
-    def calculate_win_condition(self):
-        # If a team has two miscommunications, the team loses
-        # If a team has two intercepts, the team wins
-        # return 0 if a win condition is not calculated, return 1 if a
-        # win condition is calculated
-
-        """ Cory's method:
-        blue_won = False
-        red_won = False
-        if self.red_team.misses == NUM_MISSES_TO_LOSE:
-            blue_won = True
-        if self.red_team.intercepts == NUM_INTERCEPTS_TO_WIN:
-            red_won = True
-        if self.blue_team.misses == NUM_MISSES_TO_LOSE:
-            red_won = True
-        if self.blue_team.intercepts == NUM_INTERCEPTS_TO_WIN:
-            blue_won = True
-        if red_won and blue_won:
-            self.red_team.endgame = EndCondition.Tie
-            self.blue_team.endgame = EndCondition.Tie
-        elif red_won:
-            self.red_team.endgame = EndCondition.Win
-        elif blue_won:
-            self.blue_team.endgame = EndCondition.Win
-        else:
-            self.red_team.engame = EndCondition.NotYet
-            self.blue_team.engame = EndCondition.NotYet
-        """
-
-        if (self.red_team.misses != NUM_MISSES_TO_LOSE
-                and self.blue_team.misses != NUM_MISSES_TO_LOSE
-                and self.red_team.intercepts != NUM_INTERCEPTS_TO_WIN
-                and self.blue_team.intercepts != NUM_INTERCEPTS_TO_WIN):
-            return 0
-        # end game condition is met, now we see whether is a win/lose situation or a tie
-        if (self.red_team.intercepts == NUM_INTERCEPTS_TO_WIN):
-            # red team has the intercepts to win, check whether blue team has that
-            # as well
-            if (self.blue_team.intercepts == NUM_INTERCEPTS_TO_WIN):
-                self.red_team.endgame = EndCondition.Tie
-                self.blue_team.endgame = EndCondition.Tie
-
->>>>>>> ee7884194841e7a6db4c350600548dc94350c542
 
 GAMES: DefaultDict[str, Game] = defaultdict(Game)
 
