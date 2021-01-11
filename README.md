@@ -4,16 +4,16 @@ Online version of the [Decrypto](https://boardgamegeek.com/boardgame/225694/decr
 
 ## Running the game
 
-First run the backend
+Run the backend on one terminal
 
 ```bash
 cd backend
 python3 setup.py install
-python3 src # ??? idk
+python3 -m src
 cd ..
 ```
 
-Then launch the frontend
+Then launch the frontend on another
 
 ```bash
 cd frontend

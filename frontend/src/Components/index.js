@@ -1,9 +1,13 @@
 import history from './history';
-import Team from './Team';
-import Word from './Word';
+import Teams from './Teams';
+import Words from './Words';
+import Actions from './Actions';
+import socket from './Socket';
 
 export {
     history,
-    Team,
-    Word,
+    Teams,
+    Words,
+    Actions,
+    socket,
 };

@@ -4,7 +4,7 @@ import styled from "styled-components";
 import "tabler-react/dist/Tabler.css";
 import { Form, Grid, Button } from "tabler-react";
 
-import { history } from "../Components";
+import { history, socket } from "../Components";
 
 const Title = styled.h1 `
   font-family: "Cutive Mono", monospace;
@@ -15,36 +15,40 @@ const Title = styled.h1 `
 const LandingPage = () => {
 
   const [username, setUsername] = useState("");
+  const [code, setCode] = useState("");
 
-  const handleChange = (e) => {
-    // console.log(e.target.value);
-    setUsername(e.target.value);
-  };
+  const handleNameChange = (e) => setUsername(e.target.value);
+  const handleCodeChange = (e) => setCode(e.target.value);
 
   const submit = () => {
-    console.log(username);
     // TODO: Input checking
-    // TODO: API Call
-    // let room_id = "main";
-    // socket.emit("submit_name", {
-    //   player_name: name,
-    //   room_id: room_id,
-    // });
-    // history.push(`/game?room_id=${room_id}&name=${name}`);
-    history.push(`/game?room_id=main&name=${username}`);
+    console.log(username);
+
+    let room_id = "main";
+    let submit_data = {
+      player_name: username,
+      room_id: room_id,
+      code: code,
+    };
+
+    socket.emit("submit_name", submit_data);
+    history.push(`/game?room_id=${room_id}&name=${username}`);
   };
 
   return (
     <Grid.Col width={4} offset={4} className="mt-5 pt-5" >
       <Title>DECRYPTO</Title>
-      <Form.InputGroup
-        append={
-          <Button onClick={submit} color="primary">
-            Play!
-          </Button>
-        }>
-        <Form.Input onChange={handleChange} name='username' placeholder='Username'/>
-      </Form.InputGroup>
+      <Form onSubmit={submit}>
+        <Form.InputGroup
+          append={
+            <Button color="primary" type="submit">
+              Play!
+            </Button>
+          }>
+          <Form.Input onChange={handleNameChange} name='username' placeholder='Username'/>
+        </Form.InputGroup>
+        <Form.Input onChange={handleCodeChange} name='code' placeholder='Invite code (OPTIONAL)' className="mt-3"/>
+      </Form>
     </Grid.Col>
   );
 };
