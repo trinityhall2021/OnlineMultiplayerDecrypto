@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 
+import { Link } from "react-router-dom";
+
 import "tabler-react/dist/Tabler.css";
 import { Form, Grid, Button } from "tabler-react";
 
@@ -49,6 +51,7 @@ const LandingPage = () => {
         </Form.InputGroup>
         <Form.Input onChange={handleCodeChange} name='code' placeholder='Invite code (OPTIONAL)' className="mt-3"/>
       </Form>
+      <Link to="/instructions">Instructions</Link>
     </Grid.Col>
   );
 };
