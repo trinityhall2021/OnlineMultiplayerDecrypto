@@ -223,7 +223,7 @@ class Game():
         game_json = self.to_json()
         game_json.update({'teamIndex': self.get_team_color(username)})
         player = self.get_player(username)
-        if player.status == PlayerStatus.Giving:
+        if player is not None and player.state == PlayerState.Giving:
             game_json.update({'codeCard': self.code_card})
         return game_json
 
