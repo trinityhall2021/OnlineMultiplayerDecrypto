@@ -123,13 +123,19 @@ class Game():
 
     def get_player(self, user: str) -> Optional[Player]:
         for team in self.teams:
-          for player in team:
-              if player.name == user:
-                  return player
+            for player in team:
+                if player.name == user:
+                    return player
         return None
 
     def get_team(self, team_color: TeamColor):
         return self.teams[team_color.value]
+
+    def get_team_color(self, username: str):
+        for team in self.teams:
+            for player in team:
+                if player.name == username:
+                    return team.color
 
     def get_team_turns(self) -> Tuple[TeamColor, TeamColor]:
         # Returns the guessing team and intercepting team respectively
@@ -227,6 +233,11 @@ class Game():
     def to_json(self):
         return {'teams': [t.to_json() for t in self.teams]}
 
+    def user_json(self, username):
+        game_json = self.to_json()
+        game_json.update({'teamIndex': self.get_team_color(username)})
+        return game_json
+
 
 GAMES: DefaultDict[str, Game] = defaultdict(Game)
 
@@ -236,7 +247,7 @@ def state():
     room_id = request.args['room_id']
     user = request.args['user']
     game = GAMES[room_id]
-    return game.to_json()
+    return game.user_json(username=user)
 
 
 @socketio.on('submit_guess')
