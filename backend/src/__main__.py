@@ -193,19 +193,19 @@ class Game():
         # end game condition is met, now we tally the score
         red_team_score = self.red_team.intercepts - self.red_team.misses
         blue_team_score = self.blue_team.intercepts - self.blue_team.misses
-        if (red_team_score > blue_team_score) {
+        if (red_team_score > blue_team_score) :
             # red team wins, blue team loses
             self.red_team.endgame = EndCondition.Win
             self.blue_team.endgame = EndCondition.Loss
-        } else if (red_team_score < blue_team_score) {
+        elif (red_team_score < blue_team_score) :
             # blue team wins, red team loses
             self.red_team.endgame = EndCondition.Loss
             self.blue_team.endgame = EndCondition.Win
-        } else {
+        else : 
             # it's a tie.
             self.red_team.endgame = EndCondition.Tie
             self.blue_team.endgame = EndCondition.Tie
-        }
+        
         return 1
 
 
