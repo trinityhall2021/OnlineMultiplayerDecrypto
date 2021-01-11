@@ -35,13 +35,13 @@ NUM_MISSES_TO_LOSE = 2
 
 
 class TeamColor(int, enum.Enum):
-    Red = 0
-    Blue = 1
+    RED = 0
+    BLUE = 1
 
     @classmethod
     def other(cls, team_color: TeamColor):
-        return {TeamColor.Red: TeamColor.Blue,
-                TeamColor.Blue: TeamColor.Red}[team_color]
+        return {TeamColor.RED: TeamColor.BLUE,
+                TeamColor.BLUE: TeamColor.RED}[team_color]
 
 
 class PlayerState(str, enum.Enum):
@@ -113,13 +113,13 @@ class Team():
 @dataclasses.dataclass
 class Game():
     teams: List[Team, Team] = dataclasses.field(
-        default_factory=lambda: [Team(color=TeamColor.Red), Team(color=TeamColor.Blue)])
+        default_factory=lambda: [Team(color=TeamColor.RED), Team(color=TeamColor.BLUE)])
     code_card: Optional[Tuple[int]] = None
     normal_guess: Optional[Tuple[int]] = None
     intercept_guess: Optional[Tuple[int]] = None
 
     def __post_init__(self):
-        self.starting_team = self.teams[TeamColor.Red.value]
+        self.starting_team = self.teams[TeamColor.RED.value]
 
     def get_player(self, user: str) -> Optional[Player]:
         for team in self.teams:
@@ -145,8 +145,8 @@ class Game():
 
     def update_player_states_after_join(self):
         if all(len(t) >= 2 for t in self.teams):
-            red_team = self.teams[TeamColor.Red.value]
-            blue_team = self.teams[TeamColor.Blue.value]
+            red_team = self.teams[TeamColor.RED.value]
+            blue_team = self.teams[TeamColor.BLUE.value]
             for player in blue_team:
                 player.state = PlayerState.Intercepting
             for player in red_team:
