@@ -9,9 +9,7 @@ class Submit extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      code_1: "1",
-      code_2: "2",
-      code_3: "3",
+      code_card: ['1', '2', '3']
     };
     this.handleChange = this.handleChange.bind(this);
   }
@@ -36,7 +34,7 @@ class Submit extends Component {
       <div>
         <h3>{title}</h3>
         <select
-          value={this.state.code_1}
+          value={this.state.code_card[0]}
           onChange={this.handleChange}
           name="code_1"
         >
@@ -46,7 +44,7 @@ class Submit extends Component {
           <option value="4">4</option>
         </select>
         <select
-          value={this.state.code_2}
+          value={this.state.code_card[1]}
           onChange={this.handleChange}
           name="code_2"
         >
@@ -56,7 +54,7 @@ class Submit extends Component {
           <option value="4">4</option>
         </select>
         <select
-          value={this.state.code_3}
+          value={this.state.code_card[2]}
           onChange={this.handleChange}
           name="code_3"
         >
@@ -65,19 +63,38 @@ class Submit extends Component {
           <option value="3">3</option>
           <option value="4">4</option>
         </select>
-        <button onClick={() => buttonFunction(this.state)}>Submit</button>
+        <button onClick={() => buttonFunction(this.state.code_card)}>Submit</button>
       </div>
     );
   }
 }
 
 function submitGuess(code) {
-  console.log(code);
-  socket.emit("submit_guess", code);
+  const urlParams = new URLSearchParams(window.location.search);
+  const roomId = urlParams.get("room_id");
+  const user = urlParams.get("name");
+  socket.emit(
+    "submit_guess",
+    {
+      'guess': code,
+      'guess_type': 'normal',
+      'room_id': roomId,
+      'user': user,
+    });
 }
 
 function interceptGuess(code) {
-  socket.emit("intercept_guess", code);
+  const urlParams = new URLSearchParams(window.location.search);
+  const roomId = urlParams.get("room_id");
+  const user = urlParams.get("name");
+  socket.emit(
+    "submit_guess",
+    {
+      'guess': code,
+      'guess_type': 'intercept',
+      'room_id': roomId,
+      'user': user,
+    });
 }
 
 socket.on("guess_submitted", (msg) => {
