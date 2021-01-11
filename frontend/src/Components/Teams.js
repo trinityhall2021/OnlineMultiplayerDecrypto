@@ -6,19 +6,21 @@ const PlayerRow = (props) => {
     return (
         <Table.Row>
             <Table.Col>
-                {props.player}
+                {props.player.name}
                 {props.isYou ? <Badge className="mx-2">YOU</Badge>:<Fragment/>}
             </Table.Col>
-            <Table.Col/>
+            <Table.Col>
+                <Badge color="secondary" className="mx-2">{props.player.state}</Badge>
+            </Table.Col>
         </Table.Row>
     );
 };
 
 const Team = (props) => {
 
-    const teamColor = (props.teamData.color === 'red') ? "danger" : "primary";
-    const teamName = (props.teamData.color === 'red') ? "Team Red" : "Team Blue";
-    const teamMembers = props.teamData.players.map((p, i) => <PlayerRow player={p} isYou={props.username === p} key={i}/>);
+    const teamColor = (props.teamData.color === 'RED') ? "danger" : "primary";
+    const teamName = (props.teamData.color === 'RED') ? "Team Red" : "Team Blue";
+    const teamMembers = props.teamData.players.map((p, i) => <PlayerRow player={p} isYou={props.username === p.name} key={i}/>);
 
     return (
         <Grid.Col>
