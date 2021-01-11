@@ -4,7 +4,7 @@ import styled from "styled-components";
 import "tabler-react/dist/Tabler.css";
 import { Grid } from "tabler-react";
 
-import { Teams, Words, Actions, socket, EndGameMessage} from "../Components";
+import { Teams, Words, Actions, socket } from "../Components";
 
 const Title = styled.h1 `
   font-family: "Cutive Mono", monospace;
@@ -47,6 +47,7 @@ const GamePage = () => {
     fetch(`/state?room_id=main&user=${username}`)
       .then((resp) => resp.json())
       .then((data) => {
+        console.log(data);
         setGameData(data);
       });
     // TODO: Fetch data via API
@@ -58,7 +59,6 @@ const GamePage = () => {
     <Grid>
       <Grid.Col lg={8} offsetLg={2} >
         <Title width={4} offset={4} className="mt-4 mb-3">DECRYPTO</Title>
-        <EndGameMessage red_team_endgame={gameData.teams[0].endgame} blue_team_endgame={gameData.teams[1].endgame} />
         <Teams teamsData={gameData.teams} username={username}/>
         <Words words={gameData.teams[gameData.teamIndex].words} />
         <Actions />
