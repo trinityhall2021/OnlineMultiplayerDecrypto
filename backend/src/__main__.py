@@ -302,7 +302,7 @@ def submit_name(json, methods=['GET', 'PUT', 'POST']):
     player = Player(name=player_name)
     team.add_player(player)
     game.update_player_states_after_join()
-    message = game.to_json()
+    message = game.user_json(username=player_name)
     logger.info(message)
     socketio.emit('player_added', message)
 

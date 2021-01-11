@@ -4,7 +4,7 @@ import styled from "styled-components";
 import "tabler-react/dist/Tabler.css";
 import { Grid } from "tabler-react";
 
-import { Teams, Words, Actions } from "../Components";
+import { Teams, Words, Actions, socket} from "../Components";
 
 const Title = styled.h1 `
   font-family: "Cutive Mono", monospace;
@@ -38,6 +38,10 @@ const GamePage = () => {
 
   const [ gameData, setGameData ] = useState(initData);
   useEffect(() => {
+    socket.on("player_added", (data) => {
+      data.teamIndex = gameData.teamIndex;
+      setGameData(data);
+    });
     fetch(`/state?room_id=main&user=${username}`)
       .then((resp) => resp.json())
       .then((data) => {
