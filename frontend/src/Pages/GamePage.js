@@ -4,7 +4,7 @@ import styled from "styled-components";
 import "tabler-react/dist/Tabler.css";
 import { Grid } from "tabler-react";
 
-import { Teams, Words, Actions, socket, cookies } from "../Components";
+import { Teams, Words, Actions } from "../Components";
 
 const Title = styled.h1 `
   font-family: "Cutive Mono", monospace;
@@ -33,20 +33,19 @@ let initData = {
 };
 
 const GamePage = () => {
-  const username = cookies.get("username");
+  const urlParams = new URLSearchParams(window.location.search);
+  const username = urlParams.get("name");
 
   const [ gameData, setGameData ] = useState(initData);
   useEffect(() => {
-    // TODO: Update data via async socket
-    // socket.on("player_added", (data) => {
-    //   setGameData(data);
-    //   console.log(data);
-    // });
     fetch(`/state?room_id=main&user=${username}`)
       .then((resp) => resp.json())
       .then((data) => {
         setGameData(data);
       });
+    // TODO: Fetch data via API
+    setGameData(initData);
+    console.log(gameData);
   }, []);
   
   return (

@@ -3,7 +3,6 @@ import Teams from './Teams';
 import Words from './Words';
 import Actions from './Actions';
 import socket from './Socket';
-import cookies from './Cookies';
 
 export {
     history,
@@ -11,5 +10,4 @@ export {
     Words,
     Actions,
     socket,
-    cookies,
 };

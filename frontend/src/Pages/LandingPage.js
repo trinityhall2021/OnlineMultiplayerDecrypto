@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 
 import "tabler-react/dist/Tabler.css";
 import { Form, Grid, Button } from "tabler-react";
 
-import { history, socket, cookies } from "../Components";
+import { history, socket } from "../Components";
 
 const Title = styled.h1 `
   font-family: "Cutive Mono", monospace;
@@ -20,13 +20,6 @@ const LandingPage = () => {
   const handleNameChange = (e) => setUsername(e.target.value);
   const handleCodeChange = (e) => setCode(e.target.value);
 
-  useEffect(() => {
-    let uname = cookies.get('username');
-    if(typeof uname !== 'undefined'){
-      setUsername(uname);
-    }
-  }, []);
-
   const submit = () => {
     // TODO: Input checking
     console.log(username);
@@ -38,9 +31,8 @@ const LandingPage = () => {
       code: code,
     };
 
-    cookies.set("username", username, { path: '/' })
     socket.emit("submit_name", submit_data);
-    history.push(`/game?room_id=${room_id}`);
+    history.push(`/game?room_id=${room_id}&name=${username}`);
   };
 
   return (
@@ -53,7 +45,7 @@ const LandingPage = () => {
               Play!
             </Button>
           }>
-          <Form.Input onChange={handleNameChange} value={username} name='username' placeholder='Username'/>
+          <Form.Input onChange={handleNameChange} name='username' placeholder='Username'/>
         </Form.InputGroup>
         <Form.Input onChange={handleCodeChange} name='code' placeholder='Invite code (OPTIONAL)' className="mt-3"/>
       </Form>
