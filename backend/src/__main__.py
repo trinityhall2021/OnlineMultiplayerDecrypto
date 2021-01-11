@@ -106,6 +106,7 @@ class Team():
             'intercepts': self.intercepts,
             'misses': self.misses,
             'players': [p.to_json() for p in self.players],
+            'endgame': self.endgame,
             'words': self.word_list
         }
 
@@ -185,7 +186,9 @@ class Game():
         if (current_team != self.starting_team):
             self.num_turns += 1
             # TODO: Emit a win / loss condition 
-            self.calculate_win_condition()
+            ret_val = self.calculate_win_condition()
+            if (ret_val == 1):
+                self.emit_results()
 
     def calculate_win_condition(self):
         
@@ -214,7 +217,7 @@ class Game():
         else:
             self.red_team.engame = EndCondition.Tie
             self.blue_team.engame = EndCondition.Tie
-        return None
+        return 1
 
     def to_json(self):
         return {'teams': [t.to_json() for t in self.teams]}
