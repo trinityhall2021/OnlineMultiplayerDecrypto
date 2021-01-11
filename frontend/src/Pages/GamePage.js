@@ -12,43 +12,41 @@ const Title = styled.h1 `
   text-align: center;
 `
 
-let testData = {
-  teams: [
+let initData = {
+  "teamIndex": 0,
+  "teams": [
     {
-      color: "red",
-      players: [
-        "th0m4s",
-        "Cory",
-        "Andrey"
-      ],
-      misses: 0,
-      intercepts: 0
-    },
+      "color": "RED", 
+      "intercepts": 0, 
+      "misses": 0, 
+      "players": [], 
+      "words": ["","","",""]
+    }, 
     {
-      color: "blue",
-      players: [
-        "Gordon",
-        "Brenda",
-        "Brian"
-      ],
-      misses: 0,
-      intercepts: 0
+      "color": "BLUE", 
+      "intercepts": 0, 
+      "misses": 0, 
+      "players": [], 
+      "words": ["","","",""]
     }
-  ],
-  words: ["Hello", "World", "Weird", "Flex"],
+  ]
 };
 
 const GamePage = () => {
   const username = cookies.get("username");
 
-  const [ gameData, setGameData ] = useState(testData);
+  const [ gameData, setGameData ] = useState(initData);
   useEffect(() => {
-    // TODO: Fetch data via API
+    // TODO: Update data via async socket
     // socket.on("player_added", (data) => {
     //   setGameData(data);
+    //   console.log(data);
     // });
-    setGameData(testData);
-    console.log(gameData);
+    fetch(`/state?room_id=main&user=${username}`)
+      .then((resp) => resp.json())
+      .then((data) => {
+        setGameData(data);
+      });
   }, []);
   
   return (
@@ -57,7 +55,7 @@ const GamePage = () => {
         <Title width={4} offset={4} className="mt-4 mb-3">DECRYPTO</Title>
 
         <Teams teamsData={gameData.teams} username={username}/>
-        <Words words={gameData.words} />
+        <Words words={gameData.teams[gameData.teamIndex].words} />
         <Actions />
 
       </Grid.Col>
