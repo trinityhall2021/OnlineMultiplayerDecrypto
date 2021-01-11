@@ -114,9 +114,9 @@ class Team():
 class Game():
     teams: List[Team, Team] = dataclasses.field(
         default_factory=lambda: [Team(color=TeamColor.RED), Team(color=TeamColor.BLUE)])
-    code_card: Optional[Tuple[int]] = None
-    normal_guess: Optional[Tuple[int]] = None
-    intercept_guess: Optional[Tuple[int]] = None
+    code_card: Optional[List[int]] = None
+    normal_guess: Optional[List[int]] = None
+    intercept_guess: Optional[List[int]] = None
 
     def __post_init__(self):
         self.starting_team = self.teams[TeamColor.RED.value]
@@ -236,6 +236,9 @@ class Game():
     def user_json(self, username):
         game_json = self.to_json()
         game_json.update({'teamIndex': self.get_team_color(username)})
+        player = self.get_player(username)
+        if player.status == PlayerStatus.Giving:
+            game_json.update({'codeCard': self.code_card})
         return game_json
 
 
@@ -266,13 +269,13 @@ def submit_guess(json, methods=['GET', 'PUT', 'POST']):
     should_update = False
     if guess_type == 'intercept':
         if player.state == PlayerState.Intercepting:
-            game.intercept_guess = tuple(guess)
+            game.intercept_guess = guess
             should_update = True
         else:
             logger.warning('player submitted invalid guess')
     if guess_type == 'normal':
         if player.state == PlayerState.Guessing:
-            game.normal_guess = tuple(guess)
+            game.normal_guess = guess
             should_update = True
         else:
             logger.warning('player submitted invalid guess')
