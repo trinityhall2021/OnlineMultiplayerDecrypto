@@ -4,7 +4,7 @@ import styled from "styled-components";
 import "tabler-react/dist/Tabler.css";
 import { Grid } from "tabler-react";
 
-import { Teams, Words, Actions } from "../Components";
+import { Teams, Words, Actions, socket} from "../Components";
 
 const Title = styled.h1 `
   font-family: "Cutive Mono", monospace;
@@ -12,40 +12,43 @@ const Title = styled.h1 `
   text-align: center;
 `
 
-let testData = {
-  teams: [
+let initData = {
+  "teamIndex": 0,
+  "teams": [
     {
-      color: "red",
-      players: [
-        "th0m4s",
-        "Cory",
-        "Andrey"
-      ],
-      misses: 0,
-      intercepts: 0
-    },
+      "color": "RED", 
+      "intercepts": 0, 
+      "misses": 0, 
+      "players": [], 
+      "words": ["","","",""]
+    }, 
     {
-      color: "blue",
-      players: [
-        "Gordon",
-        "Brenda",
-        "Brian"
-      ],
-      misses: 0,
-      intercepts: 0
+      "color": "BLUE", 
+      "intercepts": 0, 
+      "misses": 0, 
+      "players": [], 
+      "words": ["","","",""]
     }
-  ],
-  words: ["Hello", "World", "Weird", "Flex"],
+  ]
 };
 
 const GamePage = () => {
   const urlParams = new URLSearchParams(window.location.search);
   const username = urlParams.get("name");
 
-  const [ gameData, setGameData ] = useState(testData);
+  const [ gameData, setGameData ] = useState(initData);
   useEffect(() => {
+    socket.on("player_added", (data) => {
+      data.teamIndex = gameData.teamIndex;
+      setGameData(data);
+    });
+    fetch(`/state?room_id=main&user=${username}`)
+      .then((resp) => resp.json())
+      .then((data) => {
+        setGameData(data);
+      });
     // TODO: Fetch data via API
-    setGameData(testData);
+    setGameData(initData);
     console.log(gameData);
   }, []);
   
@@ -55,7 +58,7 @@ const GamePage = () => {
         <Title width={4} offset={4} className="mt-4 mb-3">DECRYPTO</Title>
 
         <Teams teamsData={gameData.teams} username={username}/>
-        <Words words={gameData.words} />
+        <Words words={gameData.teams[gameData.teamIndex].words} />
         <Actions />
 
       </Grid.Col>
