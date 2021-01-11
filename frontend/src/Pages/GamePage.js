@@ -4,7 +4,7 @@ import styled from "styled-components";
 import "tabler-react/dist/Tabler.css";
 import { Grid } from "tabler-react";
 
-import { Teams, Words, Actions } from "../Components";
+import { Teams, Words, Actions, socket, cookies } from "../Components";
 
 const Title = styled.h1 `
   font-family: "Cutive Mono", monospace;
@@ -39,12 +39,14 @@ let testData = {
 };
 
 const GamePage = () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const username = urlParams.get("name");
+  const username = cookies.get("username");
 
   const [ gameData, setGameData ] = useState(testData);
   useEffect(() => {
     // TODO: Fetch data via API
+    // socket.on("player_added", (data) => {
+    //   setGameData(data);
+    // });
     setGameData(testData);
     console.log(gameData);
   }, []);
