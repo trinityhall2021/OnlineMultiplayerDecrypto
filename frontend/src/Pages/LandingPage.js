@@ -8,14 +8,13 @@ import { Form, Grid, Button } from "tabler-react";
 
 import { history, socket } from "../Components";
 
-const Title = styled.h1 `
+const Title = styled.h1`
   font-family: "Cutive Mono", monospace;
   font-size: 48px;
   text-align: center;
-`
+`;
 
 const LandingPage = () => {
-
   const [username, setUsername] = useState("");
   const [code, setCode] = useState("");
 
@@ -38,7 +37,7 @@ const LandingPage = () => {
   };
 
   return (
-    <Grid.Col width={4} offset={4} className="mt-5 pt-5" >
+    <Grid.Col width={4} offset={4} className="mt-5 pt-5">
       <Title>DECRYPTO</Title>
       <Form onSubmit={submit}>
         <Form.InputGroup
@@ -46,10 +45,20 @@ const LandingPage = () => {
             <Button color="primary" type="submit">
               Play!
             </Button>
-          }>
-          <Form.Input onChange={handleNameChange} name='username' placeholder='Username'/>
+          }
+        >
+          <Form.Input
+            onChange={handleNameChange}
+            name="username"
+            placeholder="Username"
+          />
         </Form.InputGroup>
-        <Form.Input onChange={handleCodeChange} name='code' placeholder='Invite code (OPTIONAL)' className="mt-3"/>
+        <Form.Input
+          onChange={handleCodeChange}
+          name="code"
+          placeholder="Invite code (OPTIONAL)"
+          className="mt-3"
+        />
       </Form>
       <Link to="/instructions">Instructions</Link>
     </Grid.Col>
