@@ -283,6 +283,7 @@ def submit_guess(json, methods=['GET', 'PUT', 'POST']):
 @socketio.on('submit_name')
 def submit_name(json, methods=['GET', 'PUT', 'POST']):
     logger.info('submit_name')
+    logger.info('sid: %s', request.sid)
     logger.info(json)
     room_id = json['room_id']
     player_name = json['player_name']
