@@ -133,6 +133,7 @@ class Game():
         return self.teams[team_color.value]
 
     def get_team_color(self, username: str):
+        # TODO: failsafe
         for team in self.teams:
             for player in team:
                 if player.name == username:
@@ -227,7 +228,10 @@ class Game():
         game_json.update({'teamIndex': self.get_team_color(username)})
         player = self.get_player(username)
         if player is not None and player.state == PlayerState.Giving:
-            game_json.update({'codeCard': self.code_card})
+            self.code_card = next(codecards)
+        else:
+            self.code_card = []
+        game_json.update({'codeCard': self.code_card})
         return game_json
 
 
