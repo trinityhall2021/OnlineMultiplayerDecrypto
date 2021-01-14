@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Fragment } from "react";
 import styled from "styled-components";
 
 import "tabler-react/dist/Tabler.css";
-import { Grid } from "tabler-react";
+import { Grid  } from "tabler-react";
 
-import { Teams, Words, Guess, socket, GiveClue } from "../Components";
+import { Teams, Words, Guess, socket, GiveClue , Waiting} from "../Components";
 
 const Title = styled.h1`
   font-family: "Cutive Mono", monospace;
@@ -13,7 +13,9 @@ const Title = styled.h1`
 `;
 
 let initData = {
-  teamIndex: 0,
+  teamIndex : -1,
+  playerIndex : -1,
+  userState: "waiting",
   codeCard: [],
   teams: [
     {
@@ -42,8 +44,13 @@ const GamePage = () => {
   const [gameData, setGameData] = useState(initData);
   useEffect(() => {
     socket.on("player_added", (data) => {
-      data.teamIndex = gameData.teamIndex;
+      data.teamIndex = gameData.teamIndex
+      data.playerIndex = gameData.playerIndex
+      data.teams[0].words = gameData.teams[0].words
+      data.teams[1].words = gameData.teams[1].words
       setGameData(data);
+      console.log("added_player")
+      console.log(gameData)
     });
     fetch(`/state?room_id=main&user=${username}`)
       .then((resp) => resp.json())
@@ -56,13 +63,28 @@ const GamePage = () => {
     console.log(gameData);
   }, []);
 
-  let action;
-  // TODO: what if it is a waiting state?
-  if (gameData.codeCard === undefined || gameData.codeCard.length === 0) {
-    action = <Guess />;
-  } else {
-    action = <GiveClue codecard={gameData.codeCard} />;
-  }
+  console.log(gameData.teamIndex)
+  console.log(gameData.playerIndex)
+
+  const action =
+    gameData.teamIndex === -1 || gameData.playerIndex === -1 ? (
+        <Fragment />
+    ) : gameData.teams[gameData.teamIndex].players[gameData.playerIndex].state === "guessing" ? (
+      <Guess gameData={gameData} />
+    ) : gameData.teams[gameData.teamIndex].players[gameData.playerIndex].state === "intercepting" ? (
+      <Guess gameData={gameData} />
+    ) : gameData.teams[gameData.teamIndex].players[gameData.playerIndex].state === "giving" ? (
+      <GiveClue gameData={gameData} />
+    ) : (
+      <Fragment />
+    )
+
+  const words = 
+      gameData.teamIndex === -1 || gameData.playerIndex === -1 ? (
+        <Fragment />
+      ) : (
+        <Words words={gameData.teams[gameData.teamIndex].words} />
+      )
 
   return (
     <Grid>
@@ -71,7 +93,7 @@ const GamePage = () => {
           DECRYPTO
         </Title>
         <Teams teamsData={gameData.teams} username={username} />
-        <Words words={gameData.teams[gameData.teamIndex].words} />
+        {words}
         {action}
       </Grid.Col>
     </Grid>

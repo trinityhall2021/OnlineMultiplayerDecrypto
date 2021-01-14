@@ -127,7 +127,13 @@ class Game():
             for player in team:
                 if player.name == user:
                     return player
-        return None
+
+    def get_player_index(self, user: str) -> int:
+        for team in self.teams:
+            for p in range(len(team.players)):
+                if team.players[p].name == user:
+                    return p
+        return -1
 
     def get_team(self, team_color: TeamColor):
         return self.teams[team_color.value]
@@ -221,17 +227,20 @@ class Game():
         return 1
 
     def to_json(self):
-        return {'teams': [t.to_json() for t in self.teams]}
+        game_json = {'teams': [t.to_json() for t in self.teams]}
+        return game_json
 
-    def user_json(self, username):
+    def user_json(self, player_name):
         game_json = self.to_json()
-        game_json.update({'teamIndex': self.get_team_color(username)})
-        player = self.get_player(username)
+        game_json.update({'teamIndex': self.get_team_color(player_name)})
+        game_json.update({'playerIndex': self.get_player_index(player_name)})
+        player = self.get_player(player_name)
         if player is not None and player.state == PlayerState.Giving:
             self.code_card = next(codecards)
         else:
             self.code_card = []
         game_json.update({'codeCard': self.code_card})
+        logging.info(game_json)
         return game_json
 
 
@@ -240,10 +249,13 @@ GAMES: DefaultDict[str, Game] = defaultdict(Game)
 
 @app.route('/state')
 def state():
+    logger.info("In state() function")
     room_id = request.args['room_id']
     user = request.args['user']
     game = GAMES[room_id]
-    return game.user_json(username=user)
+    game_json = game.user_json(player_name=user)
+    logging.info(game_json)
+    return game_json
 
 
 @socketio.on('submit_guess')
@@ -251,6 +263,7 @@ def submit_guess(json, methods=['GET', 'PUT', 'POST']):
     logger.info(json)
     room_id = json['room_id']
     guess = json['guess']
+    print(guess)
     guess_type = json['guess_type']
     user = json['user']
     game = GAMES[room_id]
@@ -282,6 +295,7 @@ def submit_guess(json, methods=['GET', 'PUT', 'POST']):
     else:
         logger.warning('Not updating due to invalid request')
     logger.info(game)
+    
 
 
 @socketio.on('submit_name')
