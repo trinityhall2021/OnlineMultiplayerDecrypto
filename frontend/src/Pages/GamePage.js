@@ -57,6 +57,14 @@ const GamePage = () => {
       console.log("added_player")
     });
 
+    socket.on("update_game", (data) => {
+      // a player is added from the server. this should only update
+      // gameData and not individual playerData
+      setGameData(data);
+      console.log("update game stats")
+    });
+
+
     socket.on("update_player_and_game", (data) => {
       console.log("Updating player and game")
       console.log(data)
@@ -64,9 +72,6 @@ const GamePage = () => {
       setGameData(data.gameData)
     })
     
-    socket.on("testmessage", (data) => {
-      console.log("testmessage")
-    })
     fetch(`/state?room_id=main&user=${username}`)
     .then((resp) => resp.json())
     .then((data) => {
@@ -89,9 +94,9 @@ const GamePage = () => {
 
   const action =
     playerData.userState === "guessing" ? (
-      <Guess gameData={gameData} />
+      <Guess gameData={gameData} playerData={playerData} username={username}/>
     ) : playerData.userState === "intercepting" ? (
-      <Guess gameData={gameData} />
+      <Guess gameData={gameData} playerData={playerData} username={username}/>
     ) : playerData.userState === "giving" ? (
       <GiveClue codeCard={playerData.codeCard} />
     ) : (
