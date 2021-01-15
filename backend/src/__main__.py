@@ -64,6 +64,7 @@ class EndCondition(str, enum.Enum):
 @dataclasses.dataclass
 class Player():
     name: str
+    sid: str
     state: PlayerState = PlayerState.Waiting
 
     def to_json(self):
@@ -118,9 +119,13 @@ class Game():
     code_card: Optional[List[int]] = None
     normal_guess: Optional[List[int]] = None
     intercept_guess: Optional[List[int]] = None
+    # indicate whether we are mid turn, this prevents other players from joining and 
+    # resetting the
+    turn_in_progress: bool = False
 
     def __post_init__(self):
         self.starting_team = self.teams[TeamColor.RED.value]
+        self.code_card = next(codecards)
 
     def get_player(self, user: str) -> Optional[Player]:
         for team in self.teams:
@@ -154,10 +159,11 @@ class Game():
                     other_team = self.get_team(other_team_color)
                     return team, other_team
 
+
     def smallest_team(self):
         return min(self.teams, key=lambda t: len(t))
 
-    def update_player_states_after_join(self):
+    def update_and_send_player_states_after_join(self):
         if all(len(t) >= 2 for t in self.teams):
             red_team = self.teams[TeamColor.RED.value]
             blue_team = self.teams[TeamColor.BLUE.value]
@@ -166,6 +172,16 @@ class Game():
             for player in red_team:
                 player.state = PlayerState.Guessing
             red_team.players[0].state = PlayerState.Giving
+        message = self.to_json()
+        logger.info("sending player_added message")
+        socketio.emit('player_added', message)
+        # TODO: Is this the best implementation?
+        if not self.turn_in_progress :
+            for player in self.teams[TeamColor.RED.value]:
+                socketio.emit('update_player_and_game', self.user_json(player.name), room=player.sid);
+                socketio.emit('testmessage', [])
+            for player in self.teams[TeamColor.BLUE.value]:
+                socketio.emit('update_player_and_game', self.user_json(player.name), room=player.sid);
 
     def update_player_states_after_guess(self):
         guessing_team, intercepting_team = self.get_team_turns()
@@ -177,6 +193,7 @@ class Game():
             for player in intercepting_team:
                 player.state = PlayerState.Guessing
             clue_giver.state = PlayerState.Giving
+        self.code_card = next(codecards)
 
     def tally_score(self):
         guessing_team, intercepting_team = self.get_team_turns()
@@ -228,20 +245,30 @@ class Game():
 
     def to_json(self):
         game_json = {'teams': [t.to_json() for t in self.teams]}
+        # remove the words since different teams do not need to 
+        # know the words from the other team 
+        del game_json['teams'][0]['words']
+        del game_json['teams'][1]['words']
         return game_json
 
     def user_json(self, player_name):
         game_json = self.to_json()
-        game_json.update({'teamIndex': self.get_team_color(player_name)})
-        game_json.update({'playerIndex': self.get_player_index(player_name)})
         player = self.get_player(player_name)
-        if player is not None and player.state == PlayerState.Giving:
-            self.code_card = next(codecards)
-        else:
-            self.code_card = []
-        game_json.update({'codeCard': self.code_card})
-        logging.info(game_json)
-        return game_json
+        team_color = self.get_team_color(player_name)
+        player_json = {
+            'teamIndex' : team_color,
+            'playerIndex': self.get_player_index(player_name),
+            'userState': player.state,
+            'codeCard': self.code_card,
+            'words' : self.get_team(team_color).word_list
+        }
+        message = {
+            'gameData': game_json,
+            'playerData': player_json
+        }
+
+        logging.info(message)
+        return message
 
 
 GAMES: DefaultDict[str, Game] = defaultdict(Game)
@@ -309,13 +336,16 @@ def submit_name(json, methods=['GET', 'PUT', 'POST']):
         team = game.starting_team
     else:
         team = game.smallest_team()
-    player = Player(name=player_name)
+    player = Player(name=player_name, sid=request.sid)
     team.add_player(player)
-    game.update_player_states_after_join()
-    message = game.to_json()
-    logger.info(message)
-    socketio.emit('player_added', message)
+    game.update_and_send_player_states_after_join()
 
+
+    
+@socketio.on('connected')
+def connected():
+    print("%s connected" % (request.namespace.socket.sessid))
+    clients.append(request.namespace)
 
 @socketio.on('connect')
 def connect(methods=['GET', 'PUT', 'POST']):
