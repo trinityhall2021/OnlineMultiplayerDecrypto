@@ -25,6 +25,7 @@ const Section = styled.h1`
 `;
 
 const Words = (props) => {
+  console.log(props.words)
   let words = props.words.map((w, i) => <Word word={w} key={i} />);
   return (
     <Fragment>

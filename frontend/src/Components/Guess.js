@@ -25,7 +25,10 @@ const Guess = (props) => {
     console.log(guess3);
 
     let submit_guesses = {
-      guess : [guess1, guess2, guess3]
+      room_id : "main",
+      player: props.username,
+      guess_type: props.playerData.userState,
+      guess : [parseInt(guess1), parseInt(guess2), parseInt(guess3)]
     };
 
     socket.emit("submit_guess", submit_guesses);

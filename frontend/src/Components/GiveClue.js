@@ -21,7 +21,7 @@ const WordText = styled.h1`
 const GiveClue = (props) => {
   let codecard = "";
   for (let i = 0; i < 3; i++) {
-    codecard += props.codecard[i];
+    codecard += props.codeCard[i];
     codecard += " ";
   }
 
