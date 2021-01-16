@@ -24,11 +24,7 @@ const GiveClue = (props) => {
     codecard += props.codeCard[i];
     codecard += " ";
   }
-  let placeholders = [
-    `Hint for ${props.codeWords[0]}`,
-    `Hint for ${props.codeWords[1]}`,
-    `Hint for ${props.codeWords[2]}`,
-  ];
+  let placeholders = props.codeCard.map(n => `Hint for ${props.codeWords[n-1]}`);
   return (
     <Fragment>
       <Section className="mt-0 mb-2">GIVE CLUE</Section>
