@@ -10,8 +10,10 @@ from collections import defaultdict
 
 from flask import Flask, render_template, request
 from flask.json import jsonify
-from flask_socketio import SocketIO # type: ignore
-import namegenerator # type: ignore
+from flask_socketio import SocketIO  # type: ignore
+import namegenerator  # type: ignore
+
+from words import WORD_LIST
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -19,10 +21,6 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'helloworld'
 socketio = SocketIO(app, cors_allowed_origins="*")
-WORD_LIST = [
-    "ANT", "BEE", "CAT", "DOG", "EGG", "FAT", "GOAT", "HAT", "ICE", "JELLY",
-    "KING"
-]
 
 # TODO: setup UUID mechanisms so different rooms do not draw from
 # the same deck of codecards
@@ -40,8 +38,10 @@ class TeamColor(int, enum.Enum):
 
     @classmethod
     def other(cls, team_color: TeamColor):
-        return {TeamColor.RED: TeamColor.BLUE,
-                TeamColor.BLUE: TeamColor.RED}[team_color]
+        return {
+            TeamColor.RED: TeamColor.BLUE,
+            TeamColor.BLUE: TeamColor.RED
+        }[team_color]
 
 
 class PlayerState(str, enum.Enum):
@@ -115,14 +115,16 @@ class Team():
 @dataclasses.dataclass
 class Game():
     teams: List[Team, Team] = dataclasses.field(
-        default_factory=lambda: [Team(color=TeamColor.RED), Team(color=TeamColor.BLUE)])
+        default_factory=lambda:
+        [Team(color=TeamColor.RED),
+         Team(color=TeamColor.BLUE)])
     code_card: Optional[List[int]] = None
     normal_guess: Optional[List[int]] = None
     intercept_guess: Optional[List[int]] = None
-    # indicate whether we are mid turn, this prevents other players from joining and 
+    # indicate whether we are mid turn, this prevents other players from joining and
     # resetting the
     turn_in_progress: bool = False
-    num_turns : int = 0
+    num_turns: int = 0
 
     def __post_init__(self):
         self.starting_team = self.teams[TeamColor.RED.value]
@@ -160,10 +162,8 @@ class Game():
                     other_team = self.get_team(other_team_color)
                     return team, other_team
 
-
     def smallest_team(self):
         return min(self.teams, key=lambda t: len(t))
-
 
     def send_new_game_states(self):
         message = self.to_json()
@@ -171,9 +171,13 @@ class Game():
 
     def send_new_player_and_game_states(self):
         for player in self.teams[TeamColor.RED.value]:
-            socketio.emit('update_player_and_game', self.user_json(player.name), room=player.sid);
+            socketio.emit('update_player_and_game',
+                          self.user_json(player.name),
+                          room=player.sid)
         for player in self.teams[TeamColor.BLUE.value]:
-            socketio.emit('update_player_and_game', self.user_json(player.name), room=player.sid);
+            socketio.emit('update_player_and_game',
+                          self.user_json(player.name),
+                          room=player.sid)
 
     def update_and_send_player_states_after_join(self):
         if all(len(t) >= 2 for t in self.teams):
@@ -203,7 +207,7 @@ class Game():
             self.normal_guess = None
             self.intercept_guess = None
             self.send_new_player_and_game_states()
-        elif self.normal_guess :
+        elif self.normal_guess:
             # only normal guess is set
             for player in guessing_team:
                 player.state = PlayerState.Guessed
@@ -233,15 +237,17 @@ class Game():
             ret_val = self.calculate_win_condition()
 
     def calculate_win_condition(self):
-        
+
         # If a team has two miscommunications, the team looses
-        # If a team has two intercepts, the team wins 
-        # return 0 if a win condition is not calculated, return 1 if a 
-        # win condition is calculated 
+        # If a team has two intercepts, the team wins
+        # return 0 if a win condition is not calculated, return 1 if a
+        # win condition is calculated
         red_team = self.get_team(TeamColor.RED)
         blue_team = self.get_team(TeamColor.BLUE)
-        logger.info("red team: {}/{} (intercepts/misses)".format(red_team.intercepts, red_team.misses))
-        logger.info("blue team: {}/{} (intercepts/misses)".format(blue_team.intercepts, blue_team.misses))
+        logger.info("red team: {}/{} (intercepts/misses)".format(
+            red_team.intercepts, red_team.misses))
+        logger.info("blue team: {}/{} (intercepts/misses)".format(
+            blue_team.intercepts, blue_team.misses))
 
         if (red_team.misses != NUM_MISSES_TO_LOSE and \
             blue_team.misses != NUM_MISSES_TO_LOSE and \
@@ -249,15 +255,15 @@ class Game():
             blue_team.intercepts != NUM_INTERCEPTS_TO_WIN and \
             red_team.num_code_gives < 8 and blue_team.num_code_gives < 8):
             return 0
-        
+
         # end game condition is met, now we tally the score
         red_team_score = red_team.intercepts - red_team.misses
         blue_team_score = blue_team.intercepts - blue_team.misses
-        if (red_team_score > blue_team_score) :
+        if (red_team_score > blue_team_score):
             # red team wins, blue team loses
             self.teams[TeamColor.RED].endgame = EndCondition.Win
             self.teams[TeamColor.BLUE].endgame = EndCondition.Loss
-        elif (red_team_score < blue_team_score) :
+        elif (red_team_score < blue_team_score):
             # blue team wins, red team loses
             self.teams[TeamColor.RED].endgame = EndCondition.Loss
             self.teams[TeamColor.BLUE].endgame = EndCondition.Win
@@ -268,8 +274,8 @@ class Game():
 
     def to_json(self):
         game_json = {'teams': [t.to_json() for t in self.teams]}
-        # remove the words since different teams do not need to 
-        # know the words from the other team 
+        # remove the words since different teams do not need to
+        # know the words from the other team
         del game_json['teams'][0]['words']
         del game_json['teams'][1]['words']
         return game_json
@@ -280,16 +286,13 @@ class Game():
         # TODO: elegantly handle player == None
         team_color = self.get_team_color(player_name)
         player_json = {
-            'teamIndex' : team_color,
+            'teamIndex': team_color,
             'playerIndex': self.get_player_index(player_name),
             'userState': player.state,
             'codeCard': self.code_card,
-            'words' : self.get_team(team_color).word_list
+            'words': self.get_team(team_color).word_list
         }
-        message = {
-            'gameData': game_json,
-            'playerData': player_json
-        }
+        message = {'gameData': game_json, 'playerData': player_json}
 
         return message
 
@@ -325,14 +328,16 @@ def submit_guess(json, methods=['GET', 'PUT', 'POST']):
         if player.state == PlayerState.Intercepting:
             game.intercept_guess = tuple(guess)
             should_update = True
-            logger.info("accepted intercept guess from {}: {}".format(player.name, game.intercept_guess))
+            logger.info("accepted intercept guess from {}: {}".format(
+                player.name, game.intercept_guess))
         else:
             logger.warning('player submitted invalid guess')
     if guess_type == PlayerState.Guessing:
         if player.state == PlayerState.Guessing:
             game.normal_guess = tuple(guess)
             should_update = True
-            logger.info("accepted normal guess from {}: {}".format(player.name, game.intercept_guess))
+            logger.info("accepted normal guess from {}: {}".format(
+                player.name, game.intercept_guess))
         else:
             logger.warning('player submitted invalid guess')
     if should_update:
@@ -344,12 +349,12 @@ def submit_guess(json, methods=['GET', 'PUT', 'POST']):
     else:
         logger.warning('Not updating due to invalid request')
     logger.info(game)
-    
 
 
 @socketio.on('submit_name')
 def submit_name(json, methods=['GET', 'PUT', 'POST']):
     logger.info('submit_name')
+    logger.info('sid: %s', request.sid)
     logger.info(json)
     room_id = json['room_id']
     player_name = json['player_name']
@@ -363,11 +368,11 @@ def submit_name(json, methods=['GET', 'PUT', 'POST']):
     game.update_and_send_player_states_after_join()
 
 
-    
 @socketio.on('connected')
 def connected():
     print("%s connected" % (request.namespace.socket.sessid))
     clients.append(request.namespace)
+
 
 @socketio.on('connect')
 def connect(methods=['GET', 'PUT', 'POST']):

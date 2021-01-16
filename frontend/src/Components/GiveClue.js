@@ -14,8 +14,8 @@ const WordText = styled.h1`
   font-family: "Cutive Mono", monospace;
   font-size: 40px;
   text-align: center;
-  margin-top: 70px;
-  margin-bottom: 70px;
+  margin-top: auto;
+  margin-bottom: auto;
 `;
 
 const GiveClue = (props) => {
@@ -24,18 +24,39 @@ const GiveClue = (props) => {
     codecard += props.codeCard[i];
     codecard += " ";
   }
-
+  let placeholders = [
+    `Hint for ${props.codeWords[0]}`,
+    `Hint for ${props.codeWords[1]}`,
+    `Hint for ${props.codeWords[2]}`,
+  ];
   return (
     <Fragment>
       <Section className="mt-0 mb-2">GIVE CLUE</Section>
-      <Grid.Row cards alignItems="center" className="px-5 mx-5">
-        <Grid.Col md={4} />
-        <Grid.Col md={4}>
-          <Card className="px-3 py-3">
+      <Grid.Row className="px-5 mx-5">
+        <Grid.Col>
+          <Card className="px-3 py-3 h-100 mt-auto mb-auto">
+            <input
+              class="form-control"
+              type="text"
+              placeholder={placeholders[0]}
+            ></input>
+            <input
+              class="form-control"
+              type="text"
+              placeholder={placeholders[1]}
+            ></input>
+            <input
+              class="form-control"
+              type="text"
+              placeholder={placeholders[2]}
+            ></input>
+          </Card>
+        </Grid.Col>
+        <Grid.Col>
+          <Card className="px-3 py-3 h-100">
             <WordText>{codecard}</WordText>
           </Card>
         </Grid.Col>
-        <Grid.Col md={4}></Grid.Col>
       </Grid.Row>
     </Fragment>
   );
