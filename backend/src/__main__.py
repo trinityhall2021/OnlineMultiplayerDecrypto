@@ -13,16 +13,14 @@ from flask.json import jsonify
 from flask_socketio import SocketIO # type: ignore
 import namegenerator # type: ignore
 
+from words import WORD_LIST
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'helloworld'
 socketio = SocketIO(app, cors_allowed_origins="*")
-WORD_LIST = [
-    "ANT", "BEE", "CAT", "DOG", "EGG", "FAT", "GOAT", "HAT", "ICE", "JELLY",
-    "KING"
-]
 
 # TODO: setup UUID mechanisms so different rooms do not draw from
 # the same deck of codecards
