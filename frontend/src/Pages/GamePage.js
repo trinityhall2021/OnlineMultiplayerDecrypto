@@ -1,10 +1,10 @@
-import React, { useState, useEffect, Fragment } from "react";
+import React, { useState, useEffect, Fragment, Section } from "react";
 import styled from "styled-components";
 
 import "tabler-react/dist/Tabler.css";
-import { Grid  } from "tabler-react";
+import { Grid, Button } from "tabler-react";
 
-import { Teams, Words, Guess, socket, GiveClue , Waiting} from "../Components";
+import { Teams, Words, Guess, socket, GiveClue , Waiting, EndGameMessage} from "../Components";
 
 const Title = styled.h1`
   font-family: "Cutive Mono", monospace;
@@ -109,6 +109,7 @@ const GamePage = () => {
         <Title width={4} offset={4} className="mt-4 mb-3">
           DECRYPTO
         </Title>
+        <EndGameMessage red_team_endgame={gameData.teams[0].endgame} blue_team_endgame={gameData.teams[1].endgame} />
         <Teams teamsData={gameData.teams} username={username} />
         <Words words={playerData.words} />
         {action}
