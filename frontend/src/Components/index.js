@@ -5,5 +5,6 @@ import Guess from "./Guess";
 import socket from "./Socket";
 import GiveClue from "./GiveClue";
 import Waiting from "./Waiting";
+import EndGameMessage from "./EndGameMessage";
 
-export { history, Teams, Words, Guess, GiveClue, Waiting, socket };
+export { history, Teams, Words, Guess, GiveClue, Waiting, socket , EndGameMessage};

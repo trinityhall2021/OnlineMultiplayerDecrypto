@@ -25,30 +25,12 @@ const Team = (props) => {
     <PlayerRow player={p} isYou={props.username === p.name} key={i} />
   ));
 
-  const gameEnd =
-    props.teamData.endgame === "win" ? (
-      <Badge className="mx-3" color="success">
-        Win!
-      </Badge>
-    ) : props.teamData.endgame === "loss" ? (
-      <Badge className="mx-3" color="danger">
-        Lose :(
-      </Badge>
-    ) : props.teamData.endgame === "tie" ? (
-      <Badge className="mx-3" color="primary">
-        Tie!
-      </Badge>
-    ) : (
-      <Fragment />
-    );
-
   return (
     <Grid.Col>
       <Card statusColor={teamColor}>
         <Card.Header>
           <Card.Title>
             {teamName}
-            {gameEnd}
           </Card.Title>
         </Card.Header>
         <Table cards={true} striped={true} responsive={true}>
