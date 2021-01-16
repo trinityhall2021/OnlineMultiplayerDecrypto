@@ -30,6 +30,11 @@ const GiveClue = (props) => {
       <Section className="mt-0 mb-2">GIVE CLUE</Section>
       <Grid.Row className="px-5 mx-5">
         <Grid.Col>
+          <Card className="px-3 py-3 h-100">
+            <WordText>{codecard}</WordText>
+          </Card>
+        </Grid.Col>
+        <Grid.Col>
           <Card className="px-3 py-3 h-100 mt-auto mb-auto">
             <form>
               <input
@@ -49,11 +54,6 @@ const GiveClue = (props) => {
               ></input>
               <button type="submit" class="btn btn-primary w-100">Submit</button>
             </form>
-          </Card>
-        </Grid.Col>
-        <Grid.Col>
-          <Card className="px-3 py-3 h-100">
-            <WordText>{codecard}</WordText>
           </Card>
         </Grid.Col>
       </Grid.Row>
