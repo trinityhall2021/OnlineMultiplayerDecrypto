@@ -35,21 +35,24 @@ const GiveClue = (props) => {
       <Grid.Row className="px-5 mx-5">
         <Grid.Col>
           <Card className="px-3 py-3 h-100 mt-auto mb-auto">
-            <input
-              class="form-control"
-              type="text"
-              placeholder={placeholders[0]}
-            ></input>
-            <input
-              class="form-control"
-              type="text"
-              placeholder={placeholders[1]}
-            ></input>
-            <input
-              class="form-control"
-              type="text"
-              placeholder={placeholders[2]}
-            ></input>
+            <form>
+              <input
+                class="form-control my-3"
+                type="text"
+                placeholder={placeholders[0]}
+              ></input>
+              <input
+                class="form-control my-3"
+                type="text"
+                placeholder={placeholders[1]}
+              ></input>
+              <input
+                class="form-control my-3"
+                type="text"
+                placeholder={placeholders[2]}
+              ></input>
+              <button type="submit" class="btn btn-primary w-100">Submit</button>
+            </form>
           </Card>
         </Grid.Col>
         <Grid.Col>
