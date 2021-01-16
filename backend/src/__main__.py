@@ -193,7 +193,6 @@ class Game():
         guessing_team, intercepting_team = self.get_team_turns()
         if self.normal_guess and self.intercept_guess:
             # both guesses are given, update the code card as well as each others roles
-            guessing_team.num_code_gives += 1
             clue_giver = intercepting_team.next_clue_giver()
             for player in guessing_team:
                 player.state = PlayerState.Intercepting
@@ -232,8 +231,6 @@ class Game():
 
         if (guessing_team.num_code_gives == intercepting_team.num_code_gives):
             ret_val = self.calculate_win_condition()
-            if (ret_val == 1):
-                self.send_new_game_states()
 
     def calculate_win_condition(self):
         
@@ -244,7 +241,7 @@ class Game():
         red_team = self.get_team(TeamColor.RED)
         blue_team = self.get_team(TeamColor.BLUE)
         logger.info("red team: {}/{} (intercepts/misses)".format(red_team.intercepts, red_team.misses))
-        logger.info("blue team: {}/{} (intercepts/misses".format(blue_team.intercepts, blue_team.misses))
+        logger.info("blue team: {}/{} (intercepts/misses)".format(blue_team.intercepts, blue_team.misses))
 
         if (red_team.misses != NUM_MISSES_TO_LOSE and \
             blue_team.misses != NUM_MISSES_TO_LOSE and \
@@ -340,6 +337,8 @@ def submit_guess(json, methods=['GET', 'PUT', 'POST']):
             logger.warning('player submitted invalid guess')
     if should_update:
         if game.intercept_guess and game.normal_guess:
+            guessing_team, _ = game.get_team_turns()
+            guessing_team.num_code_gives += 1
             game.tally_score()
         game.update_and_send_player_states_after_guess()
     else:
