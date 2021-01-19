@@ -29,7 +29,11 @@ const EndGameMessage = (props) => {
         <Grid.Row className="px-5 mx-5">
         <Grid.Col>
         <Alert type={endgameColor} align="center" isDismissible>
-            <strong>{endGameMessage}</strong>
+            <p><strong>{endGameMessage}</strong></p>
+            <Button.List>
+                <Button color="info" RootComponent="button" >Rematch</Button>
+                <Button color="secondary" RootComponent="button">Reveal Words</Button>
+            </Button.List>
         </Alert> 
         </Grid.Col>
         </Grid.Row>

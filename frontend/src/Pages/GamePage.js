@@ -24,6 +24,7 @@ let initPlayerData = {
 
 // This is game information that is broadcasted to everyone.
 let initData = {
+  given_clues: [],
   teams: [
     {
       color: "RED",

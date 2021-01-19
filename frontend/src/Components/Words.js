@@ -5,10 +5,10 @@ import { Grid, Card } from "tabler-react";
 
 const WordText = styled.h1`
   font-family: "Cutive Mono", monospace;
-  font-size: 40px;
+  font-size: 30px;
   text-align: center;
-  margin-top: 70px;
-  margin-bottom: 70px;
+  margin-top: 40px;
+  margin-bottom: 40px;
 `;
 const indexText = styled.h1`
   font-family: "Cutive Mono", monospace;

@@ -2,7 +2,7 @@ import React, { Fragment, useState } from "react";
 import styled from "styled-components";
 
 import "tabler-react/dist/Tabler.css";
-import { Grid, Form, Card, Button } from "tabler-react";
+import { Grid, Form, Card, Button, Header } from "tabler-react";
 
 import { socket } from "../Components";
 
@@ -41,6 +41,7 @@ const Guess = (props) => {
       <Grid.Row cards alignItems="center" className="px-5 mx-5">
         <Card width={4} className="px-5 mx-5 py-5">
           <Form.Group className="my-1">
+          <p>Select best guess for <strong>{props.gameData.given_clues[0]}</strong></p>
             <Form.SelectGroup
               color="success"
               onChange={(e) => setGuess1(e.target.value)}
@@ -52,6 +53,7 @@ const Guess = (props) => {
             </Form.SelectGroup>
           </Form.Group>
           <Form.Group className="my-1">
+          <p>Select best guess for <strong>{props.gameData.given_clues[1]}</strong></p>
             <Form.SelectGroup
               color="success"
               onChange={(e) => setGuess2(e.target.value)}
@@ -63,6 +65,7 @@ const Guess = (props) => {
             </Form.SelectGroup>
           </Form.Group>
           <Form.Group className="my-1">
+          <p>Select best guess for <strong>{props.gameData.given_clues[2]}</strong></p>
             <Form.SelectGroup
               color="success"
               onChange={(e) => setGuess3(e.target.value)}

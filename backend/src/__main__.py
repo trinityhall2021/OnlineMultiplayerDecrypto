@@ -121,6 +121,7 @@ class Game():
     code_card: Optional[List[int]] = None
     normal_guess: Optional[List[int]] = None
     intercept_guess: Optional[List[int]] = None
+    given_clue: Optional[List[str]] = None
     # indicate whether we are mid turn, this prevents other players from joining and
     # resetting the
     turn_in_progress: bool = False
@@ -180,17 +181,41 @@ class Game():
                           room=player.sid)
 
     def update_and_send_player_states_after_join(self):
+        """
+        Another user joins the game, set the first clue giver and 
+        keep other players in waiting state
+        TODO: Handle the situation where users join WHILE the game is in 
+        progress
+        """
         if all(len(t) >= 2 for t in self.teams):
             red_team = self.teams[TeamColor.RED.value]
             blue_team = self.teams[TeamColor.BLUE.value]
             for player in blue_team:
-                player.state = PlayerState.Intercepting
+                player.state = PlayerState.Waiting
             for player in red_team:
-                player.state = PlayerState.Guessing
+                player.state = PlayerState.Waiting
             red_team.players[0].state = PlayerState.Giving
         message = self.to_json()
         logger.info("sending player_added message")
         socketio.emit('player_added', message)
+        self.send_new_player_and_game_states()
+
+
+    def update_and_send_player_states_after_submit_clue(self, submitted_clues):
+        """
+        A clue is submitted from the clue giver, update all players
+        from waiting to intercept/guessing state, and the clue giver 
+        to waiting state
+        """
+        guessing_team, intercepting_team = self.get_team_turns()
+        for player in guessing_team:
+            if player.state == PlayerState.Giving:
+                player.state = PlayerState.Waiting
+            else:
+                player.state = PlayerState.Guessing
+        for player in intercepting_team:
+            player.state = PlayerState.Intercepting
+        self.given_clue = submitted_clues
         self.send_new_player_and_game_states()
 
     def update_and_send_player_states_after_guess(self):
@@ -237,7 +262,6 @@ class Game():
             ret_val = self.calculate_win_condition()
 
     def calculate_win_condition(self):
-
         # If a team has two miscommunications, the team looses
         # If a team has two intercepts, the team wins
         # return 0 if a win condition is not calculated, return 1 if a
@@ -274,6 +298,7 @@ class Game():
 
     def to_json(self):
         game_json = {'teams': [t.to_json() for t in self.teams]}
+        game_json.update({'given_clues':self.given_clue})
         # remove the words since different teams do not need to
         # know the words from the other team
         del game_json['teams'][0]['words']
@@ -322,7 +347,7 @@ def submit_clues(json, methods=['GET', 'PUT', 'POST']):
     clues = json['clues']
     game = GAMES[room_id]
     # TODO: add clues as properties of the game? 
-
+    game.update_and_send_player_states_after_submit_clue(clues)
 
 
 @socketio.on('submit_guess')
