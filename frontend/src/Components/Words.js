@@ -26,7 +26,7 @@ const Section = styled.h1`
 
 const Words = (props) => {
   console.log(props.words);
-  let words = props.words.map((w, i) => <Word word={w} key={i} />);
+  let words = props.words.map((w, i) => <Word word={w} key={i} teamColor={props.teamColor}/>);
   return (
     <Fragment>
       <Section width={4} offset={4} className="mt-0 mb-2">
@@ -40,9 +40,11 @@ const Words = (props) => {
 };
 
 const Word = (props) => {
+  console.log(props.teamColor)
+  const teamColor = props.teamColor === 0 ? "danger" : "primary";
   return (
     <Grid.Col>
-      <Card statusColor="success" className="px-3 py-3">
+      <Card statusColor={teamColor} className="px-3 py-3">
         <WordText>{props.word}</WordText>
       </Card>
     </Grid.Col>

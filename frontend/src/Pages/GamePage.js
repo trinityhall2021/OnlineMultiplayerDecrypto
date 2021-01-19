@@ -96,7 +96,7 @@ const GamePage = () => {
     ) : playerData.userState === "intercepting" ? (
       <Guess gameData={gameData} playerData={playerData} username={username} />
     ) : playerData.userState === "giving" ? (
-      <GiveClue codeCard={playerData.codeCard} codeWords={playerData.words} />
+      <GiveClue playerData={playerData} username={username}/>
     ) : (
       <Fragment />
     );
@@ -109,7 +109,7 @@ const GamePage = () => {
         </Title>
         <EndGameMessage red_team_endgame={gameData.teams[0].endgame} blue_team_endgame={gameData.teams[1].endgame} />
         <Teams teamsData={gameData.teams} username={username} />
-        <Words words={playerData.words} />
+        <Words words={playerData.words} teamColor={playerData.teamIndex}/>
         {action}
       </Grid.Col>
     </Grid>

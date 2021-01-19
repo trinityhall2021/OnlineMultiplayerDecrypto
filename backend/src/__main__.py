@@ -309,6 +309,21 @@ def state():
     game_json = game.user_json(player_name=user)
     return game_json
 
+@socketio.on('submit_clues')
+def submit_clues(json, methods=['GET', 'PUT', 'POST']):
+    """
+    A clue is submitted, store it in the game class and send the clue 
+    information to everyone else 
+    """
+    logger.info('submit_clue')
+    logger.info(json)
+    room_id = json['room_id']
+    playername = json['player']
+    clues = json['clues']
+    game = GAMES[room_id]
+    # TODO: add clues as properties of the game? 
+
+
 
 @socketio.on('submit_guess')
 def submit_guess(json, methods=['GET', 'PUT', 'POST']):
@@ -349,6 +364,8 @@ def submit_guess(json, methods=['GET', 'PUT', 'POST']):
     else:
         logger.warning('Not updating due to invalid request')
     logger.info(game)
+
+
 
 
 @socketio.on('submit_name')
