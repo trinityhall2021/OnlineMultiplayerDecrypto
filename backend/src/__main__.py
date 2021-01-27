@@ -14,7 +14,6 @@ from flask_socketio import SocketIO  # type: ignore
 import namegenerator  # type: ignore
 
 from words import WORD_LIST
-
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -75,12 +74,18 @@ def generate_words():
     # TODO: seed the random?
     return random.sample(WORD_LIST, k=4)
 
+def generate_list_of_list():
+    ret_val = list()
+    for i in range(4):
+        ret_val.append(list())
+    return ret_val
 
 @dataclasses.dataclass
 class Team():
     color: TeamColor
     players: List[Player] = dataclasses.field(default_factory=list)
     word_list: List[str] = dataclasses.field(default_factory=generate_words)
+    submitted_clues: List[List] = dataclasses.field(default_factory=generate_list_of_list)
     num_code_gives: int = 0
     intercepts: int = 0
     misses: int = 0
@@ -108,7 +113,8 @@ class Team():
             'misses': self.misses,
             'players': [p.to_json() for p in self.players],
             'endgame': self.endgame,
-            'words': self.word_list
+            'words': self.word_list,
+            'previous_clues': self.submitted_clues
         }
 
 
@@ -180,6 +186,12 @@ class Game():
                           self.user_json(player.name),
                           room=player.sid)
 
+    def send_clue(self):
+        message = self.clue_to_json()
+        print(message)
+        message = {'clueData': message}
+        socketio.emit('update_clues', message)
+
     def update_and_send_player_states_after_join(self):
         """
         Another user joins the game, set the first clue giver and 
@@ -216,7 +228,9 @@ class Game():
         for player in intercepting_team:
             player.state = PlayerState.Intercepting
         self.given_clue = submitted_clues
+        logger.info("given clues: {}".format(self.given_clue))
         self.send_new_player_and_game_states()
+        self.send_clue()
 
     def update_and_send_player_states_after_guess(self):
         guessing_team, intercepting_team = self.get_team_turns()
@@ -242,6 +256,16 @@ class Game():
             for player in intercepting_team:
                 player.state = PlayerState.Intercepted
             self.send_new_game_states()
+
+
+    def update_previous_clues_list(self):
+        """
+        Add given_clues to the previous clues list in order to show the guessers what they guessed 
+        """
+        guessing_team, _ = self.get_team_turns()
+        for i in range(3):
+            guessing_team.submitted_clues[self.code_card[i]-1].append(self.given_clue[i])
+
 
     def tally_score(self):
         guessing_team, intercepting_team = self.get_team_turns()
@@ -298,12 +322,27 @@ class Game():
 
     def to_json(self):
         game_json = {'teams': [t.to_json() for t in self.teams]}
-        game_json.update({'given_clues':self.given_clue})
+
         # remove the words since different teams do not need to
         # know the words from the other team
         del game_json['teams'][0]['words']
         del game_json['teams'][1]['words']
         return game_json
+
+    def clue_to_json(self):
+        if self.given_clue is None or len(self.given_clue) < 3:
+            clue_json = {
+                "clue0": "",
+                "clue1": "",
+                "clue2": ""
+            }
+        else :
+            clue_json = {
+                "clue0": self.given_clue[0],
+                "clue1": self.given_clue[1],
+                "clue2": self.given_clue[2]
+            }
+        return clue_json
 
     def user_json(self, player_name):
         game_json = self.to_json()
@@ -317,7 +356,8 @@ class Game():
             'codeCard': self.code_card,
             'words': self.get_team(team_color).word_list
         }
-        message = {'gameData': game_json, 'playerData': player_json}
+
+        message = {'gameData': game_json, 'playerData': player_json, 'clueData': self.clue_to_json()}
 
         return message
 
@@ -383,6 +423,7 @@ def submit_guess(json, methods=['GET', 'PUT', 'POST']):
     if should_update:
         if game.intercept_guess and game.normal_guess:
             guessing_team, _ = game.get_team_turns()
+            game.update_previous_clues_list()
             guessing_team.num_code_gives += 1
             game.tally_score()
         game.update_and_send_player_states_after_guess()

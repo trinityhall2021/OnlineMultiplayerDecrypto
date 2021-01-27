@@ -24,7 +24,6 @@ let initPlayerData = {
 
 // This is game information that is broadcasted to everyone.
 let initData = {
-  given_clues: [],
   teams: [
     {
       color: "RED",
@@ -32,6 +31,7 @@ let initData = {
       misses: 0,
       players: [],
       endgame: "not yet",
+      previous_clues: [[], [], [], []]
     },
     {
       color: "BLUE",
@@ -39,8 +39,15 @@ let initData = {
       misses: 0,
       players: [],
       endgame: "not yet",
+      previous_clues: [[], [], [], []]
     },
   ],
+};
+
+let initClueData = {
+  clue0: "",
+  clue1: "",
+  clue2: ""
 };
 
 const GamePage = () => {
@@ -49,6 +56,7 @@ const GamePage = () => {
 
   const [gameData, setGameData] = useState(initData);
   const [playerData, setPlayerData] = useState(initPlayerData);
+  const [clueData, setClueData] = useState(initClueData);
 
   useEffect(() => {
     socket.on("player_added", (data) => {
@@ -68,8 +76,15 @@ const GamePage = () => {
     socket.on("update_player_and_game", (data) => {
       console.log("Updating player and game");
       console.log(data);
-      setPlayerData(data.playerData);
       setGameData(data.gameData);
+      setPlayerData(data.playerData);
+      setClueData(data.clueData);
+    });
+
+    socket.on("update_clues", (data) => {
+      console.log("Updating clues");
+      console.log(data);
+      setClueData(data.clueData);
     });
 
     fetch(`/state?room_id=main&user=${username}`)
@@ -80,6 +95,7 @@ const GamePage = () => {
         // This should retrieve both their gameData and individualData
         setPlayerData(data.playerData);
         setGameData(data.gameData);
+        setClueData(data.clueData);
       });
 
     // setGameData(initData);
@@ -93,9 +109,9 @@ const GamePage = () => {
 
   const action =
     playerData.userState === "guessing" ? (
-      <Guess gameData={gameData} playerData={playerData} username={username} />
+      <Guess gameData={gameData} playerData={playerData} clueData={clueData} username={username} />
     ) : playerData.userState === "intercepting" ? (
-      <Guess gameData={gameData} playerData={playerData} username={username} />
+      <Guess gameData={gameData} playerData={playerData} clueData={clueData} username={username} />
     ) : playerData.userState === "giving" ? (
       <GiveClue playerData={playerData} username={username}/>
     ) : (
@@ -110,7 +126,7 @@ const GamePage = () => {
         </Title>
         <EndGameMessage red_team_endgame={gameData.teams[0].endgame} blue_team_endgame={gameData.teams[1].endgame} />
         <Teams teamsData={gameData.teams} username={username} />
-        <Words words={playerData.words} teamColor={playerData.teamIndex}/>
+        <Words words={playerData.words} teamColor={playerData.teamIndex} gameData={gameData}/>
         {action}
       </Grid.Col>
     </Grid>
