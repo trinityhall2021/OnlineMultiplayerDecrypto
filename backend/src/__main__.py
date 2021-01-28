@@ -258,6 +258,19 @@ class Game():
             self.send_new_game_states()
 
 
+    def broadcast_guesses(self, guesses, team_id):
+        """
+        broadcast clues from one teammate to other teammates
+        """
+        guess_json = {'guesses': guesses}
+
+        for player in self.teams[team_id]:
+            if player.state == PlayerState.Guessing or \
+                player.state == PlayerState.Intercepting:
+                socketio.emit('broadcast_clues',
+                          guess_json,
+                          room=player.sid)
+
     def update_previous_clues_list(self):
         """
         Add given_clues to the previous clues list in order to show the guessers what they guessed 
@@ -388,6 +401,21 @@ def submit_clues(json, methods=['GET', 'PUT', 'POST']):
     game = GAMES[room_id]
     # TODO: add clues as properties of the game? 
     game.update_and_send_player_states_after_submit_clue(clues)
+
+
+@socketio.on('clicked_potential_guess')
+def click_potential_guess(json, methods=['GET', 'PUT', 'POST']):
+    """
+    Someone clicked on a guess, synchronize across other players on the team. 
+    """
+    logger.info('clicked potential guess')
+    logger.info(json)
+    room_id = json['room_id']
+    team = json['player_team']
+    guesses = json['guess']
+    game = GAMES[room_id]
+    # broadcast guesses to other team members
+    game.broadcast_guesses(guesses, team)
 
 
 @socketio.on('submit_guess')
