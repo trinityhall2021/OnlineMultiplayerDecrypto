@@ -26,9 +26,32 @@ const Section = styled.h1`
 
 const Words = (props) => {
   console.log(props.words);
-  let corresponding_clues = props.teamColor === 0 ? props.red_team_clues : props.blue_team_clues;
-  console.log(corresponding_clues)
-  let words = props.words.map((w, i) => <Word word={w} key={i} teamColor={props.teamColor} clues={corresponding_clues[i]}/>);
+  let corresponding_clues;
+  let wordColor;
+  if (props.teamColor === 0) {
+    if (props.userState === 'intercepting') {
+      corresponding_clues = props.blueTeamClues
+      wordColor = 1
+    } else {
+      corresponding_clues = props.redTeamClues
+      wordColor = 0
+    }
+  } else {
+    if (props.userState === 'intercepting') {
+      corresponding_clues = props.redTeamClues
+      wordColor = 0
+    } else {
+      corresponding_clues = props.blueTeamClues
+      wordColor = 1
+    }
+  }
+  console.log({corresponding_clues})
+  let words;
+  if (props.userState === 'intercepting') {
+    words = props.words.map((w, i) => <Word word={'???'} key={i} teamColor={wordColor} clues={corresponding_clues[i]}/>);
+  } else {
+    words = props.words.map((w, i) => <Word word={w} key={i} teamColor={wordColor} clues={corresponding_clues[i]}/>);
+  }
   let word_clues0 = corresponding_clues[0].map((c, j) => <p>{c}</p>)
   let word_clues1 = corresponding_clues[1].map((c, j) => <p>{c}</p>)
   let word_clues2 = corresponding_clues[2].map((c, j) => <p>{c}</p>)
