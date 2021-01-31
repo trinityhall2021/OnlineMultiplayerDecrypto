@@ -10,7 +10,7 @@ from collections import defaultdict
 
 from flask import Flask, render_template, request
 from flask.json import jsonify
-from flask_socketio import SocketIO  # type: ignore
+from flask_socketio import SocketIO, join_room, leave_room  # type: ignore
 import namegenerator  # type: ignore
 
 from words import WORD_LIST
@@ -128,6 +128,7 @@ class Game():
     normal_guess: Optional[List[int]] = None
     intercept_guess: Optional[List[int]] = None
     given_clue: Optional[List[str]] = None
+    name: str = None
     # indicate whether we are mid turn, this prevents other players from joining and
     # resetting the
     turn_in_progress: bool = False
@@ -174,7 +175,7 @@ class Game():
 
     def send_new_game_states(self):
         message = self.to_json()
-        socketio.emit('update_game', message)
+        socketio.emit('update_game', message, room=self.name)
 
     def send_new_player_and_game_states(self):
         for player in self.teams[TeamColor.RED.value]:
@@ -190,7 +191,7 @@ class Game():
         message = self.clue_to_json()
         print(message)
         message = {'clueData': message}
-        socketio.emit('update_clues', message)
+        socketio.emit('update_clues', message, room=self.name)
 
     def update_and_send_player_states_after_join(self):
         """
@@ -210,7 +211,7 @@ class Game():
         message = self.to_json()
         logger.info("sending player_added message")
         logger.info(message)
-        socketio.emit('player_added', message)
+        socketio.emit('player_added', message, room=self.name)
         self.send_new_player_and_game_states()
 
 
@@ -271,7 +272,7 @@ class Game():
     def tally_score(self):
         guessing_team, intercepting_team = self.get_team_turns()
 
-        if (self.normal_guess is None or self.intercept_guess is None):
+        if (self.normal_fguess is None or self.intercept_guess is None):
             logger.error('Both guesses must be supplied to tally score')
             return
 
@@ -350,6 +351,7 @@ class Game():
         player = self.get_player(player_name)
         # TODO: elegantly handle player == None
         team_color = self.get_team_color(player_name)
+        print 
         player_json = {
             'teamIndex': team_color,
             'playerIndex': self.get_player_index(player_name),
@@ -369,11 +371,37 @@ GAMES: DefaultDict[str, Game] = defaultdict(Game)
 @app.route('/state')
 def state():
     logger.info("In state() function")
+    logger.info(request.args)
     room_id = request.args['room_id']
     user = request.args['user']
     game = GAMES[room_id]
+    game.name = room_id
     game_json = game.user_json(player_name=user)
     return game_json
+
+@app.route('/create_room')
+def create_room():
+    # user wants to create a room , create a room with a unique name
+    logger.info("User requested a room to be created")
+    new_room_name = ""
+    while (new_room_name in GAMES or len(new_room_name) == 0):
+        new_room_name = namegenerator.gen()
+    print(jsonify(room_name = new_room_name).get_data())
+    return jsonify(room_name = new_room_name)
+
+@app.route('/join_room')
+def join_specified_room():
+    # user wants to join a room, make sure the room exists
+    logger.info("User requested to join a room")
+    logger.info(request.args)
+    room_id = request.args['room_id']
+    if room_id not in GAMES:
+        # room id is not in games, the redirection didn't succeed 
+        return jsonify(found_room="failed")
+    else:
+        # return success status
+        return jsonify(found_room="succeed")
+
 
 
 @socketio.on('submit_clues')
@@ -458,6 +486,8 @@ def submit_name(json, methods=['GET', 'PUT', 'POST']):
         team = game.smallest_team()
     player = Player(name=player_name, sid=request.sid)
     team.add_player(player)
+    # TODO: Need to implement leave_room logic
+    join_room(room_id)
     socketio.emit('user_joined',
                   {'room_id': room_id, 'username': player_name},
                   room=request.sid)
@@ -473,14 +503,6 @@ def connected():
 @socketio.on('connect')
 def connect(methods=['GET', 'PUT', 'POST']):
     logger.info('connecting')
-
-
-@app.route('/requestClue')
-def request_clue(methods=['GET', 'POST']):
-    current_codecard = []
-    current_codecard = next(codecards)
-    print("Clue requested : " + str(current_codecard))
-    return jsonify({"codecard": current_codecard})
 
 
 if __name__ == '__main__':

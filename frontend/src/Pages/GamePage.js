@@ -2,13 +2,19 @@ import React, { useState, useEffect, Fragment, Section } from "react";
 import styled from "styled-components";
 
 import "tabler-react/dist/Tabler.css";
-import { Grid, Button } from "tabler-react";
+import { Grid, Button, Header } from "tabler-react";
 
 import { Teams, Words, Guess, socket, GiveClue , Waiting, EndGameMessage} from "../Components";
 
 const Title = styled.h1`
   font-family: "Cutive Mono", monospace;
   font-size: 48px;
+  text-align: center;
+`;
+
+const Caption = styled.h2`
+  font-family: "Cutive Mono", monospace;
+  font-size: 20px;
   text-align: center;
 `;
 
@@ -53,6 +59,7 @@ let initClueData = {
 const GamePage = () => {
   const urlParams = new URLSearchParams(window.location.search);
   const username = urlParams.get("name");
+  const room_id = urlParams.get("room_id")
 
   const [gameData, setGameData] = useState(initData);
   const [playerData, setPlayerData] = useState(initPlayerData);
@@ -86,7 +93,7 @@ const GamePage = () => {
       console.log(data);
       setClueData(data.clueData);
     });
-    fetch(`/state?room_id=main&user=${username}`)
+    fetch(`/state?room_id=${room_id}&user=${username}`)
       .then((resp) => resp.json())
       .then((data) => {
         // This happens when the user first joins the game,
@@ -108,9 +115,9 @@ const GamePage = () => {
 
   const action =
     playerData.userState === "guessing" ? (
-      <Guess gameData={gameData} playerData={playerData} clueData={clueData} username={username} />
+      <Guess gameData={gameData} playerData={playerData} clueData={clueData} username={username} room_id={room_id}/>
     ) : playerData.userState === "intercepting" ? (
-      <Guess gameData={gameData} playerData={playerData} clueData={clueData} username={username} />
+      <Guess gameData={gameData} playerData={playerData} clueData={clueData} username={username} room_id={room_id}/>
     ) : playerData.userState === "giving" ? (
       <GiveClue playerData={playerData} username={username}/>
     ) : (
@@ -121,8 +128,9 @@ const GamePage = () => {
     <Grid>
       <Grid.Col lg={8} offsetLg={2}>
         <Title width={4} offset={4} className="mt-4 mb-3">
-          DECRYPTO
+          UNCRYPTO
         </Title>
+        <Caption>Invite your friends by sharing the code "{room_id}"</Caption>
         <EndGameMessage red_team_endgame={gameData.teams[0].endgame} blue_team_endgame={gameData.teams[1].endgame} />
         <Teams teamsData={gameData.teams} username={username} />
         <Words 

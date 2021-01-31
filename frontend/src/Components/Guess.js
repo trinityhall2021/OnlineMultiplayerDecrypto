@@ -24,7 +24,7 @@ const Guess = (props) => {
     console.log(guess3);
 
     let submit_guesses = {
-      room_id: "main",
+      room_id: props.room_id,
       player: props.username,
       guess_type: props.playerData.userState,
       guess: [parseInt(guess1), parseInt(guess2), parseInt(guess3)],
