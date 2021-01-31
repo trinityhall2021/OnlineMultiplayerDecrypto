@@ -10,7 +10,7 @@ from collections import defaultdict
 
 from flask import Flask, render_template, request
 from flask.json import jsonify
-from flask_socketio import SocketIO  # type: ignore
+from flask_socketio import SocketIO, join_room, leave_room  # type: ignore
 import namegenerator  # type: ignore
 
 from words import WORD_LIST
@@ -128,6 +128,7 @@ class Game():
     normal_guess: Optional[List[int]] = None
     intercept_guess: Optional[List[int]] = None
     given_clue: Optional[List[str]] = None
+    name: str = None
     # indicate whether we are mid turn, this prevents other players from joining and
     # resetting the
     turn_in_progress: bool = False
@@ -174,7 +175,7 @@ class Game():
 
     def send_new_game_states(self):
         message = self.to_json()
-        socketio.emit('update_game', message)
+        socketio.emit('update_game', message, room=self.name)
 
     def send_new_player_and_game_states(self):
         for player in self.teams[TeamColor.RED.value]:
@@ -190,7 +191,7 @@ class Game():
         message = self.clue_to_json()
         print(message)
         message = {'clueData': message}
-        socketio.emit('update_clues', message)
+        socketio.emit('update_clues', message, room=self.name)
 
     def update_and_send_player_states_after_join(self):
         """
@@ -210,7 +211,7 @@ class Game():
         message = self.to_json()
         logger.info("sending player_added message")
         logger.info(message)
-        socketio.emit('player_added', message)
+        socketio.emit('player_added', message, room=self.name)
         self.send_new_player_and_game_states()
 
 
@@ -374,10 +375,10 @@ def state():
     room_id = request.args['room_id']
     user = request.args['user']
     game = GAMES[room_id]
+    game.name = room_id
     game_json = game.user_json(player_name=user)
     return game_json
 
-<<<<<<< HEAD
 @app.route('/create_room')
 def create_room():
     # user wants to create a room , create a room with a unique name
@@ -389,7 +390,7 @@ def create_room():
     return jsonify(room_name = new_room_name)
 
 @app.route('/join_room')
-def join_room():
+def join_specified_room():
     # user wants to join a room, make sure the room exists
     logger.info("User requested to join a room")
     logger.info(request.args)
@@ -402,8 +403,6 @@ def join_room():
         return jsonify(found_room="succeed")
 
 
-=======
->>>>>>> 8088b92470894cd8063bdc7595ec8c8f1b83abd2
 
 @socketio.on('submit_clues')
 def submit_clues(json, methods=['GET', 'PUT', 'POST']):
@@ -487,6 +486,7 @@ def submit_name(json, methods=['GET', 'PUT', 'POST']):
         team = game.smallest_team()
     player = Player(name=player_name, sid=request.sid)
     team.add_player(player)
+    join_room(room_id)
     socketio.emit('user_joined',
                   {'room_id': room_id, 'username': player_name},
                   room=request.sid)
