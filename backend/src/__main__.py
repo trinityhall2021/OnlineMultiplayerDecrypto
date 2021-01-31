@@ -209,6 +209,7 @@ class Game():
             red_team.players[0].state = PlayerState.Giving
         message = self.to_json()
         logger.info("sending player_added message")
+        logger.info(message)
         socketio.emit('player_added', message)
         self.send_new_player_and_game_states()
 
@@ -374,6 +375,7 @@ def state():
     game_json = game.user_json(player_name=user)
     return game_json
 
+
 @socketio.on('submit_clues')
 def submit_clues(json, methods=['GET', 'PUT', 'POST']):
     """
@@ -432,8 +434,6 @@ def submit_guess(json, methods=['GET', 'PUT', 'POST']):
     logger.info(game)
 
 
-
-
 @socketio.on('submit_name')
 def submit_name(json, methods=['GET', 'PUT', 'POST']):
     logger.info('submit_name')
@@ -441,6 +441,11 @@ def submit_name(json, methods=['GET', 'PUT', 'POST']):
     logger.info(json)
     room_id = json['room_id']
     player_name = json['player_name']
+    if not player_name:
+        socketio.emit('error_joining',
+                      {'err_msg': 'You must provide a name'},
+                      room=request.sid)
+        return
     game = GAMES[room_id]
     if all(len(t) == 0 for t in game.teams):
         team = game.starting_team
@@ -448,6 +453,9 @@ def submit_name(json, methods=['GET', 'PUT', 'POST']):
         team = game.smallest_team()
     player = Player(name=player_name, sid=request.sid)
     team.add_player(player)
+    socketio.emit('user_joined',
+                  {'room_id': room_id, 'username': player_name},
+                  room=request.sid)
     game.update_and_send_player_states_after_join()
 
 
