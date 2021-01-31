@@ -127,10 +127,11 @@ const GamePage = () => {
         <EndGameMessage red_team_endgame={gameData.teams[0].endgame} blue_team_endgame={gameData.teams[1].endgame} />
         <Teams teamsData={gameData.teams} username={username} />
         <Words 
-          words={playerData.words} 
-          teamColor={playerData.teamIndex} 
-          red_team_clues={gameData.teams[0].previous_clues} 
-          blue_team_clues={gameData.teams[1].previous_clues}/>
+          words={playerData.words}
+          teamColor={playerData.teamIndex}
+          redTeamClues={gameData.teams[0].previous_clues}
+          blueTeamClues={gameData.teams[1].previous_clues}
+          userState={playerData.userState}/>
         {action}
       </Grid.Col>
     </Grid>
