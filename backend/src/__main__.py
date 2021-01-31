@@ -270,7 +270,7 @@ class Game():
     def tally_score(self):
         guessing_team, intercepting_team = self.get_team_turns()
 
-        if (self.normal_guess is None or self.intercept_guess is None):
+        if (self.normal_fguess is None or self.intercept_guess is None):
             logger.error('Both guesses must be supplied to tally score')
             return
 
@@ -349,6 +349,7 @@ class Game():
         player = self.get_player(player_name)
         # TODO: elegantly handle player == None
         team_color = self.get_team_color(player_name)
+        print 
         player_json = {
             'teamIndex': team_color,
             'playerIndex': self.get_player_index(player_name),
@@ -368,11 +369,37 @@ GAMES: DefaultDict[str, Game] = defaultdict(Game)
 @app.route('/state')
 def state():
     logger.info("In state() function")
+    logger.info(request.args)
     room_id = request.args['room_id']
     user = request.args['user']
     game = GAMES[room_id]
     game_json = game.user_json(player_name=user)
     return game_json
+
+@app.route('/create_room')
+def create_room():
+    # user wants to create a room , create a room with a unique name
+    logger.info("User requested a room to be created")
+    new_room_name = ""
+    while (new_room_name in GAMES or len(new_room_name) == 0):
+        new_room_name = namegenerator.gen()
+    print(jsonify(room_name = new_room_name).get_data())
+    return jsonify(room_name = new_room_name)
+
+@app.route('/join_room')
+def join_room():
+    # user wants to join a room, make sure the room exists
+    logger.info("User requested to join a room")
+    logger.info(request.args)
+    room_id = request.args['room_id']
+    if room_id not in GAMES:
+        # room id is not in games, the redirection didn't succeed 
+        return jsonify(found_room="failed")
+    else:
+        # return success status
+        return jsonify(found_room="succeed")
+
+
 
 @socketio.on('submit_clues')
 def submit_clues(json, methods=['GET', 'PUT', 'POST']):
@@ -460,14 +487,6 @@ def connected():
 @socketio.on('connect')
 def connect(methods=['GET', 'PUT', 'POST']):
     logger.info('connecting')
-
-
-@app.route('/requestClue')
-def request_clue(methods=['GET', 'POST']):
-    current_codecard = []
-    current_codecard = next(codecards)
-    print("Clue requested : " + str(current_codecard))
-    return jsonify({"codecard": current_codecard})
 
 
 if __name__ == '__main__':

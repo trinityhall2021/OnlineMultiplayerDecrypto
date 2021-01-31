@@ -36,7 +36,7 @@ const GiveClue = (props) => {
     console.log(clue2)
 
     let submit_clues = {
-      room_id: "main",
+      room_id: props.room_id,
       player: props.username,
       guess_type: props.playerData.userState,
       clues: [clue0, clue1, clue2]

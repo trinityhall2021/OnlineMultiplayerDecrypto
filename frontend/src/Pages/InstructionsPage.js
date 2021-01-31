@@ -18,7 +18,7 @@ const Section = styled.h1`
 const InstructionsPage = () => {
   return (
     <Grid.Col width={4} offset={4} className="mt-5 pt-5">
-      <Title>DECRYPTO</Title>
+      <Title>UNCRYPTO</Title>
       <Section>Instructions</Section>
       {/* TODO */}
     </Grid.Col>
