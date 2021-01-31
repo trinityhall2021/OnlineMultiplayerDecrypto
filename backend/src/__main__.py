@@ -441,12 +441,17 @@ def submit_name(json, methods=['GET', 'PUT', 'POST']):
     logger.info(json)
     room_id = json['room_id']
     player_name = json['player_name']
+    game = GAMES[room_id]
     if not player_name:
         socketio.emit('error_joining',
                       {'err_msg': 'You must provide a name'},
                       room=request.sid)
         return
-    game = GAMES[room_id]
+    if game.get_player(player_name):
+        socketio.emit('error_joining',
+                      {'err_msg': 'Your name is already taken'},
+                      room=request.sid)
+        return
     if all(len(t) == 0 for t in game.teams):
         team = game.starting_team
     else:
