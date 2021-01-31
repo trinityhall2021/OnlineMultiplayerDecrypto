@@ -486,6 +486,7 @@ def submit_name(json, methods=['GET', 'PUT', 'POST']):
         team = game.smallest_team()
     player = Player(name=player_name, sid=request.sid)
     team.add_player(player)
+    # TODO: Need to implement leave_room logic
     join_room(room_id)
     socketio.emit('user_joined',
                   {'room_id': room_id, 'username': player_name},
