@@ -86,7 +86,6 @@ const GamePage = () => {
       console.log(data);
       setClueData(data.clueData);
     });
-
     fetch(`/state?room_id=main&user=${username}`)
       .then((resp) => resp.json())
       .then((data) => {

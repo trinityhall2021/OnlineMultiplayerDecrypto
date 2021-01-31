@@ -14,6 +14,16 @@ const Title = styled.h1`
   text-align: center;
 `;
 
+socket.on("error_joining", (data) => {
+  alert(data['err_msg'])
+})
+
+socket.on("user_joined", (data) => {
+  let room_id = data.room_id;
+  let username = data.username;
+  history.push(`/game?room_id=${room_id}&name=${username}`);
+})
+
 const LandingPage = () => {
   const [username, setUsername] = useState("");
   const [code, setCode] = useState("");
@@ -21,19 +31,18 @@ const LandingPage = () => {
   const handleNameChange = (e) => setUsername(e.target.value);
   const handleCodeChange = (e) => setCode(e.target.value);
 
-  const submit = () => {
+  const submit = (e) => {
     // TODO: Input checking
+    e.preventDefault();
     console.log(username);
-
+    let success = false;
     let room_id = "main";
     let submit_data = {
       player_name: username,
       room_id: room_id,
       code: code,
     };
-
     socket.emit("submit_name", submit_data);
-    history.push(`/game?room_id=${room_id}&name=${username}`);
   };
 
   return (
