@@ -272,7 +272,7 @@ class Game():
     def tally_score(self):
         guessing_team, intercepting_team = self.get_team_turns()
 
-        if (self.normal_fguess is None or self.intercept_guess is None):
+        if (self.normal_guess is None or self.intercept_guess is None):
             logger.error('Both guesses must be supplied to tally score')
             return
 
