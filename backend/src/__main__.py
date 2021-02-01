@@ -5,7 +5,7 @@ import uuid
 import logging
 import dataclasses
 from itertools import permutations, cycle
-from typing import List, Optional, Tuple, DefaultDict
+from typing import List, Optional, Tuple, DefaultDict, Dict
 from collections import defaultdict
 
 from flask import Flask, render_template, request
@@ -103,6 +103,10 @@ class Team():
     def add_player(self, player):
         self.players.append(player)
 
+    def remove_player(self, player: Player):
+        if player in self.players:
+            self.players.remove(player)
+
     def next_clue_giver(self):
         return self.players[(self.num_code_gives + 1) % len(self.players)]
 
@@ -138,10 +142,20 @@ class Game():
         self.starting_team = self.teams[TeamColor.RED.value]
         self.code_card = next(codecards)
 
+    def remove_player(self, player: Player):
+        for team in self.teams:
+            team.remove_player(player)
+
     def get_player(self, user: str) -> Optional[Player]:
         for team in self.teams:
             for player in team:
                 if player.name == user:
+                    return player
+
+    def get_player_by_sid(self, sid: str) -> Optional[Player]:
+        for team in self.teams:
+            for player in team:
+                if player.sid == sid:
                     return player
 
     def get_player_index(self, user: str) -> int:
@@ -153,6 +167,12 @@ class Game():
 
     def get_team(self, team_color: TeamColor):
         return self.teams[team_color.value]
+
+    def is_empty(self):
+        if len(self.teams[0]) == 0 and len(self.teams[1]) == 0:
+            return True
+        else:
+            return False
 
     def get_team_color(self, username: str):
         # TODO: failsafe
@@ -366,6 +386,7 @@ class Game():
 
 
 GAMES: DefaultDict[str, Game] = defaultdict(Game)
+SID_TO_GAME: Dict[str, Game] = {}
 
 
 @app.route('/state')
@@ -487,7 +508,7 @@ def submit_name(json, methods=['GET', 'PUT', 'POST']):
         team = game.smallest_team()
     player = Player(name=player_name, sid=request.sid)
     team.add_player(player)
-    # TODO: Need to implement leave_room logic
+    SID_TO_GAME[request.sid] = game
     join_room(room_id)
     socketio.emit('user_joined',
                   {'room_id': room_id, 'username': player_name},
@@ -497,8 +518,25 @@ def submit_name(json, methods=['GET', 'PUT', 'POST']):
 
 @socketio.on('connected')
 def connected():
-    print("%s connected" % (request.namespace.socket.sessid))
-    clients.append(request.namespace)
+    print("Client connected")
+    SID_TO_GAME[request.sid] = None
+    #clients.append(request.namespace)
+
+
+@socketio.on('disconnect')
+def disconnect():
+    game = SID_TO_GAME.get(request.sid)
+    logger.info('sid: %s', request.sid)
+    logger.info('game: %s', game)
+    if game:
+        game.remove_player(game.get_player_by_sid(request.sid))
+        if game.is_empty():
+            logger.info('deleting game: %s', game)
+            del GAMES[game.name]
+            logger.info('number of games: %s', len(GAMES))
+        else:
+            game.send_new_game_states()
+    print('Client disconnected')
 
 
 @socketio.on('connect')
