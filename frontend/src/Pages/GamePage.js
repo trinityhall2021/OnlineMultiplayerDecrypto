@@ -119,7 +119,7 @@ const GamePage = () => {
     ) : playerData.userState === "intercepting" ? (
       <Guess gameData={gameData} playerData={playerData} clueData={clueData} username={username} room_id={room_id}/>
     ) : playerData.userState === "giving" ? (
-      <GiveClue playerData={playerData} username={username}/>
+      <GiveClue playerData={playerData} username={username} room_id={room_id}/>
     ) : (
       <Fragment />
     );
