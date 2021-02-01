@@ -375,9 +375,9 @@ def state():
     room_id = request.args['room_id']
     user = request.args['user']
     game = GAMES[room_id]
-    game.name = room_id
     game_json = game.user_json(player_name=user)
     return game_json
+
 
 @app.route('/create_room')
 def create_room():
@@ -386,8 +386,9 @@ def create_room():
     new_room_name = ""
     while (new_room_name in GAMES or len(new_room_name) == 0):
         new_room_name = namegenerator.gen()
-    print(jsonify(room_name = new_room_name).get_data())
-    return jsonify(room_name = new_room_name)
+    GAMES[new_room_name] = Game(name=new_room_name)
+    print(GAMES)
+    return jsonify(room_name=new_room_name)
 
 @app.route('/join_room')
 def join_specified_room():
