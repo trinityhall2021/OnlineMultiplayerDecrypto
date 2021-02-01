@@ -9,5 +9,5 @@ setuptools.setup(
     author='Cory Nezin',
     packages=setuptools.find_packages('src'),
     package_dir={'': 'src'},
-    install_requires=['flask-socketio', 'eventlet', 'namegenerator'],
+    install_requires=['flask-socketio', 'eventlet', 'namegenerator', 'gunicorn'],
 )
